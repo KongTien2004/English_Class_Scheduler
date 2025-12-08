@@ -1,11 +1,12 @@
 package com.english.model;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 public class ProgressRecord {
-    private String progress_id;
-    private String student_id;
-    private Date recorded_date;
+    private String progressId;
+    private String studentId;
+    private LocalDateTime recordedDate;
     private double listeningBand;
     private double readingBand;
     private double writingBand;
@@ -14,12 +15,12 @@ public class ProgressRecord {
 
     public ProgressRecord() {}
 
-    public ProgressRecord(String progress_id, String student_id, Date recorded_date,
+    public ProgressRecord(String progressId, String student_id, LocalDateTime recordedDate,
                           double listeningBand, double readingBand,
                           double writingBand, double speakingBand, double overallBand) {
-        this.progress_id = progress_id;
-        this.student_id = student_id;
-        this.recorded_date = recorded_date;
+        this.progressId = progressId;
+        this.studentId = student_id;
+        this.recordedDate = recordedDate;
         this.listeningBand = listeningBand;
         this.readingBand = readingBand;
         this.writingBand = writingBand;
@@ -28,16 +29,16 @@ public class ProgressRecord {
     }
 
 //Getter
-    public String getProgress_id() {
-        return progress_id;
+    public String getProgressId() {
+        return progressId;
     }
 
-    public String getStudent_id() {
-        return student_id;
+    public String getStudentId() {
+        return studentId;
     }
 
-    public Date getRecorded_date() {
-        return recorded_date;
+    public LocalDateTime getRecordedDate() {
+        return recordedDate;
     }
 
     public double getListeningBand() {
@@ -61,16 +62,16 @@ public class ProgressRecord {
     }
 
 //Setter
-    public void setProgress_id(String progress_id) {
-        this.progress_id = progress_id;
+    public void setProgress_id(String progressId) {
+        this.progressId = progressId;
     }
 
-    public void setStudent_id(String student_id) {
-        this.student_id = student_id;
+    public void setStudent_id(String studentId) {
+        this.studentId = studentId;
     }
 
-    public void setRecorded_date(Date recorded_date) {
-        this.recorded_date = recorded_date;
+    public void setRecordedDate(LocalDateTime recorded_date) {
+        this.recordedDate = recorded_date;
     }
 
     public void setListeningBand(double listeningBand) {
