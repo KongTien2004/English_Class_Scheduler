@@ -1,7 +1,7 @@
 package com.english.model;
 
 import java.time.LocalDate;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 public class LearningPlan {
     public enum IELTSType {GENERAL, ACADEMIC}
@@ -16,13 +16,13 @@ public class LearningPlan {
     private int remainingSessions;
     private LocalDate startDate;
     private PlanStatus planStatus;
-    private Date createdDate;
+    private LocalDateTime createdDate;
 
     public LearningPlan() {}
 
     public LearningPlan(String planId, String studentId, String mentorId, IELTSType ieltsType,
                         double targetBand, int totalSessions, int remainingSessions,
-                        LocalDate startDate, PlanStatus planStatus, Date createdDate) {
+                        LocalDate startDate, PlanStatus planStatus, LocalDateTime createdDate) {
         this.planId = planId;
         this.studentId = studentId;
         this.mentorId = mentorId;
@@ -72,7 +72,7 @@ public class LearningPlan {
         return planStatus;
     }
 
-    public Date getCreatedDate() {
+    public LocalDateTime getCreatedDate() {
         return createdDate;
     }
 
@@ -113,7 +113,7 @@ public class LearningPlan {
         this.planStatus = planStatus;
     }
 
-    public void setCreatedDate(Date createdDate) {
+    public void setCreatedDate(LocalDateTime createdDate) {
         this.createdDate = createdDate;
     }
 }
