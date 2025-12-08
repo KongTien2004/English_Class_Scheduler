@@ -1,5 +1,6 @@
 package com.english.model;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 public class LearningSession {
@@ -10,16 +11,16 @@ public class LearningSession {
     private String planId;
     private int sessionNumber;
     private SessionType sessionType;
-    private Date scheduledTime;
-    private Date actualStart;
-    private Date actualEnd;
+    private LocalDateTime scheduledTime;
+    private LocalDateTime actualStart;
+    private LocalDateTime actualEnd;
     private String location;
     private SessionStatus sessionStatus;
 
     public LearningSession() {}
 
     public LearningSession(String sessionId, String planId, int sessionNumber, SessionType sessionType,
-                           Date scheduledTime, Date actualStart, Date actualEnd,
+                           LocalDateTime scheduledTime, LocalDateTime actualStart, LocalDateTime actualEnd,
                            String location, SessionStatus sessionStatus) {
         this.sessionId = sessionId;
         this.planId = planId;
@@ -49,15 +50,15 @@ public class LearningSession {
         return sessionType;
     }
 
-    public Date getScheduledTime() {
+    public LocalDateTime getScheduledTime() {
         return scheduledTime;
     }
 
-    public Date getActualStart() {
+    public LocalDateTime getActualStart() {
         return actualStart;
     }
 
-    public Date getActualEnd() {
+    public LocalDateTime getActualEnd() {
         return actualEnd;
     }
 
@@ -86,15 +87,15 @@ public class LearningSession {
         this.sessionType = sessionType;
     }
 
-    public void setScheduledTime(Date scheduledTime) {
+    public void setScheduledTime(LocalDateTime scheduledTime) {
         this.scheduledTime = scheduledTime;
     }
 
-    public void setActualStart(Date actualStart) {
+    public void setActualStart(LocalDateTime actualStart) {
         this.actualStart = actualStart;
     }
 
-    public void setActualEnd(Date actualEnd) {
+    public void setActualEnd(LocalDateTime actualEnd) {
         this.actualEnd = actualEnd;
     }
 
