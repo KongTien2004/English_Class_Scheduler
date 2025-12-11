@@ -1,6 +1,8 @@
 package com.english.model;
 
-public class Student {
+import java.io.Serializable;
+
+public class Student implements Serializable {
     public enum IELTSType {GENERAL, ACADEMIC}
 
     private String studentId;

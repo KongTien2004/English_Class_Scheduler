@@ -1,6 +1,8 @@
 package com.english.model;
 
-public class Mentor {
+import java.io.Serializable;
+
+public class Mentor implements Serializable {
     private String mentorId;
     private String mentorName;
     private String email;

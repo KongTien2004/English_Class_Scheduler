@@ -1,9 +1,9 @@
 package com.english.model;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Date;
 
-public class LearningSession {
+public class LearningSession implements Serializable {
     public enum SessionType {ONLINE, OFFLINE}
     public enum SessionStatus {SCHEDULED, COMPLETED, CANCELLED, NO_SHOW}
 

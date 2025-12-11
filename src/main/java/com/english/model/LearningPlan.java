@@ -1,9 +1,10 @@
 package com.english.model;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-public class LearningPlan {
+public class LearningPlan implements Serializable {
     public enum IELTSType {GENERAL, ACADEMIC}
     public enum PlanStatus {ACTIVE, PAUSED, COMPLETED, CANCELLED}
 

@@ -1,9 +1,10 @@
 package com.english.model;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Date;
 
-public class ProgressRecord {
+public class ProgressRecord implements Serializable {
     private String progressId;
     private String studentId;
     private LocalDateTime recordedDate;

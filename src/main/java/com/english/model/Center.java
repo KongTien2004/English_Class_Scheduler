@@ -1,6 +1,8 @@
 package com.english.model;
 
-public class Center {
+import java.io.Serializable;
+
+public class Center implements Serializable {
     private String centerId;
     private String centerName;
     private String address;

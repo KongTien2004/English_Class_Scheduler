@@ -1,8 +1,9 @@
 package com.english.model;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 
-public class Purchase {
+public class Purchase implements Serializable {
     private String purchaseId;
     private String studentId;
     private String packageId;
