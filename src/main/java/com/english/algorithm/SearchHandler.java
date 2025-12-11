@@ -1,8 +1,8 @@
-package com.english.hill_climbing;
+package com.english.algorithm;
 
-import com.english.hill_climbing.strategy.CenterSearchStrategy;
-import com.english.hill_climbing.strategy.MentorSearchStrategy;
-import com.english.hill_climbing.strategy.StudentSearchStrategy;
+import com.english.algorithm.strategy.CenterSearchStrategy;
+import com.english.algorithm.strategy.MentorSearchStrategy;
+import com.english.algorithm.strategy.StudentSearchStrategy;
 import com.english.model.Center;
 import com.english.model.Mentor;
 import com.english.model.Student;
