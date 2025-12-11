@@ -1,6 +1,6 @@
-package com.english.hill_climbing.strategy;
+package com.english.algorithm.strategy;
 
-import com.english.hill_climbing.SearchableEntity;
+import com.english.algorithm.SearchableEntity;
 import com.english.model.Center;
 
 import java.util.List;
