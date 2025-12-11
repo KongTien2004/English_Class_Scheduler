@@ -1,5 +1,6 @@
 package com.english.DAO;
 
+import com.english.database.DBConnect;
 import com.english.model.LearningPlan;
 
 import java.sql.Connection;
@@ -10,16 +11,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LearningPlanDAO {
-    private Connection connection;
-
-    public LearningPlanDAO(Connection connection) {
-        this.connection = connection;
-    }
-
     public boolean insertLearningPlan(LearningPlan learningPlan) {
         String query = "INSERT INTO learning_plan (plan_id, student_id, mentor_id, ielts_type, target_band, total_sessions, remaining_sessions, start_date, plan_status, created_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, learningPlan.getPlanId());
             statement.setString(2, learningPlan.getStudentId());
             statement.setString(3, learningPlan.getMentorId());
@@ -41,7 +37,8 @@ public class LearningPlanDAO {
     public boolean updateLearningPlan(LearningPlan learningPlan) {
         String query = "UPDATE learning_plan SET student_id=?, mentor_id=?, ielts_type=?, target_band=?, total_sessions=?, remaining_sessions=?, start_date=?, plan_status=?, created_date=? WHERE plan_id = ?";
 
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, learningPlan.getStudentId());
             statement.setString(2, learningPlan.getMentorId());
             statement.setString(3, learningPlan.getIeltsType().name());
@@ -63,7 +60,8 @@ public class LearningPlanDAO {
     public boolean deleteLearningPlan(LearningPlan learningPlan) {
         String query = "DELETE FROM learning_plan WHERE plan_id = ?";
 
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, learningPlan.getPlanId());
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -75,7 +73,8 @@ public class LearningPlanDAO {
     public LearningPlan getLearningPLanById(String planId) {
         String query = "SELECT * FROM learning_plan WHERE plan_id = ?";
 
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, planId);
             ResultSet rs = statement.executeQuery();
             if (rs.next()) {
@@ -92,7 +91,8 @@ public class LearningPlanDAO {
         List<LearningPlan> learningPlans = new ArrayList<>();
         String query = "SELECT * FROM learning_plan";
 
-        try (PreparedStatement statement = connection.prepareStatement(query);
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query);
              ResultSet rs = statement.executeQuery()) {
             while (rs.next()) {
                 learningPlans.add(mapResultSetToLearningPlan(rs));

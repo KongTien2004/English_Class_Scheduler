@@ -1,5 +1,6 @@
 package com.english.DAO;
 
+import com.english.database.DBConnect;
 import com.english.model.LearningSession;
 
 import java.sql.Connection;
@@ -10,16 +11,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LearningSessionDAO {
-    private Connection connection;
-
-    public LearningSessionDAO(Connection connection) {
-        this.connection = connection;
-    }
-
     public boolean insertLearningSession(LearningSession learningSession) {
         String query = "INSERT INTO learning_session (session_id, plan_id, session_name, session_type, scheduled_time, actual_start, actual_end, location, session_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, learningSession.getSessionId());
             statement.setString(2, learningSession.getPlanId());
             statement.setInt(3, learningSession.getSessionNumber());
@@ -40,7 +36,8 @@ public class LearningSessionDAO {
     public boolean updateLearningSession(LearningSession learningSession) {
         String query = "UPDATE learning_session SET plan_id=?, session_name=?, session_type=?, scheduled_time=?, actual_start=?, actual_end=?, location=?, session_status=? WHERE session_id = ?";
 
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, learningSession.getPlanId());
             statement.setString(2, learningSession.getSessionId());
             statement.setString(3, learningSession.getSessionType().name());
@@ -61,7 +58,8 @@ public class LearningSessionDAO {
     public boolean deleteLearningSession(LearningSession learningSession) {
         String query = "DELETE FROM learning_session WHERE session_id = ?";
 
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, learningSession.getSessionId());
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -73,7 +71,8 @@ public class LearningSessionDAO {
     public LearningSession getLearningSessionById(String sessionId) {
         String query = "SELECT * FROM learning_session WHERE session_id = ?";
 
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, sessionId);
             ResultSet rs = statement.executeQuery();
             if (rs.next()) {
@@ -90,7 +89,8 @@ public class LearningSessionDAO {
         String query = "SELECT * FROM learning_session";
         List<LearningSession> learningSessions = new ArrayList<>();
 
-        try (PreparedStatement statement = connection.prepareStatement(query);
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query);
              ResultSet rs = statement.executeQuery()) {
             while (rs.next()) {
                 learningSessions.add(mapResultSetToLearningSession(rs));

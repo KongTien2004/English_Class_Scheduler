@@ -1,5 +1,6 @@
 package com.english.DAO;
 
+import com.english.database.DBConnect;
 import com.english.model.Student;
 
 import java.sql.Connection;
@@ -10,16 +11,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class StudentDAO {
-    private Connection connection;
-
-    public StudentDAO(Connection connection) {
-        this.connection = connection;
-    }
-
     public boolean insertStudent(Student student) {
         String query = "INSERT INTO student (student_id, student_name, phone, email, ielts_type, target_band, current_listening_band, current_reading_band, current_writing_band, current_speaking_band, preferred_center_id VALUE (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, student.getStudentId());
             statement.setString(2, student.getStudentName());
             statement.setString(3, student.getPhone());
@@ -42,7 +38,8 @@ public class StudentDAO {
     public boolean updateStudent(Student student) {
         String query = "UPDATE student SET student_name=?, phone=?, email=?, ielts_type=?, target_band=?, current_listening_band=?, current_reading_band=?, current_writing_band, current_speaking_band, preferred_center_id=? WHERE student_id=?";
 
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, student.getStudentName());
             statement.setString(2, student.getPhone());
             statement.setString(3, student.getEmail());
@@ -65,7 +62,8 @@ public class StudentDAO {
     public boolean deleteStudent(Student student) {
         String query = "DELETE FROM student WHERE student_id=?";
 
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, student.getStudentId());
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -78,7 +76,8 @@ public class StudentDAO {
         String query = "SELECT * FROM student";
         List<Student> students = new ArrayList<>();
 
-        try (PreparedStatement statement = connection.prepareStatement(query);
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query);
              ResultSet rs = statement.executeQuery()) {
             while (rs.next()) {
                 students.add(mapResultSetToStudent(rs));
@@ -109,7 +108,8 @@ public class StudentDAO {
     public Student getStudentById(String studentId) {
         String query = "SELECT * FROM student WHERE student_id=?";
 
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, studentId);
             ResultSet rs = statement.executeQuery();
             if (rs.next()) {

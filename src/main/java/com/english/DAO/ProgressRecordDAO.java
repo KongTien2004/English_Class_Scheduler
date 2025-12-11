@@ -1,5 +1,6 @@
 package com.english.DAO;
 
+import com.english.database.DBConnect;
 import com.english.model.ProgressRecord;
 
 import java.sql.Connection;
@@ -10,16 +11,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProgressRecordDAO {
-    private Connection connection;
-
-    public ProgressRecordDAO(Connection connection) {
-        this.connection = connection;
-    }
-
     public boolean insertProgressRecord(ProgressRecord progressRecord) {
         String query = "INSERT INTO progress_record (progress_id, student_id, recorded_date, listening_band, reading_band, writing_band, speaking_band, overall_band) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, progressRecord.getProgressId());
             statement.setString(2, progressRecord.getStudentId());
             statement.setTimestamp(3, java.sql.Timestamp.valueOf(progressRecord.getRecordedDate()));
@@ -39,7 +35,8 @@ public class ProgressRecordDAO {
     public boolean updateProgressRecord(ProgressRecord progressRecord) {
         String query = "UPDATE progress_record SET student_id=?, recorded_date=?, listening_band=?, reading_band=?, writing_band=?, speaking_band=?, overall_band=? WHERE progress_id=?";
 
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, progressRecord.getStudentId());
             statement.setTimestamp(2, java.sql.Timestamp.valueOf(progressRecord.getRecordedDate()));
             statement.setDouble(3, progressRecord.getListeningBand());
@@ -59,7 +56,8 @@ public class ProgressRecordDAO {
     public boolean deleteProgressRecord(ProgressRecord progressRecord) {
         String query = "DELETE FROM progress_record WHERE progress_id=?";
 
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, progressRecord.getProgressId());
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -71,7 +69,8 @@ public class ProgressRecordDAO {
     public ProgressRecord getProgressRecordById(String progressId) {
         String query = "SELECT * FROM progress_record WHERE progress_id=?";
 
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, progressId);
             ResultSet rs = statement.executeQuery();
             if (rs.next()) {
@@ -88,7 +87,8 @@ public class ProgressRecordDAO {
         String query = "SELECT * FROM progress_record";
         List<ProgressRecord> records = new ArrayList<>();
 
-        try (PreparedStatement statement = connection.prepareStatement(query);
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query);
              ResultSet rs = statement.executeQuery()) {
             while (rs.next()) {
                 records.add(mapResultSetToProgressRecord(rs));

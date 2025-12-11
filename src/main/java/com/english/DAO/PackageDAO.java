@@ -1,5 +1,6 @@
 package com.english.DAO;
 
+import com.english.database.DBConnect;
 import com.english.model.Package;
 
 import java.sql.Connection;
@@ -10,16 +11,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PackageDAO {
-    private Connection connection;
-
-    public PackageDAO(Connection connection) {
-        this.connection = connection;
-    }
-
     public boolean insertPackage(Package aPackage) {
         String query = "INSERT INTO package (package_id, package_name, ielts_type, target_band, total_sessions, price, is_active) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, aPackage.getPackageId());
             statement.setString(2, aPackage.getPackageName());
             statement.setString(3, aPackage.getIeltsType().name());
@@ -38,7 +34,8 @@ public class PackageDAO {
     public boolean updatePackage(Package aPackage) {
         String query = "UPDATE package SET package_name=?, ielts_type=?, target_band=?, total_sessions=?, price=?, is_active=? Where package_id=?";
 
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, aPackage.getPackageName());
             statement.setString(2, aPackage.getIeltsType().name());
             statement.setDouble(3, aPackage.getTargetBand());
@@ -57,7 +54,8 @@ public class PackageDAO {
     public boolean deletePackage(Package aPackage) {
         String query = "DELETE FROM package WHERE package_id=?";
 
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, aPackage.getPackageId());
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -70,7 +68,8 @@ public class PackageDAO {
         String query = "SELECT * FROM package";
         List<Package> packages = new ArrayList<>();
 
-        try (PreparedStatement statement = connection.prepareStatement(query);
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query);
              ResultSet rs = statement.executeQuery()) {
             while (rs.next()) {
                 packages.add(new Package(
@@ -93,7 +92,8 @@ public class PackageDAO {
     public Package getPackageById(String packageId) {
         String query = "SELECT * FROM package WHERE package_id=?";
 
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, packageId);
             ResultSet rs = statement.executeQuery();
             if (rs.next()) {
