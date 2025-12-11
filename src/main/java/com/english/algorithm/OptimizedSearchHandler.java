@@ -1,4 +1,4 @@
-package com.english.hill_climbing;
+package com.english.algorithm;
 
 import java.util.*;
 import java.util.stream.Collectors;
