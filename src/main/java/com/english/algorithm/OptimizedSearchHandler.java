@@ -9,10 +9,8 @@ public class OptimizedSearchHandler<T> {
     private static final int DEFAULT_MAX_ITERATIONS = 100;
     private static final int NEIGHBOUR_SIZE = 15;
 
-    public OptimizedSearchHandler() {
-    }
-
     public OptimizedSearchHandler(SearchableEntity<T> searchStrategy) {
+        this.random = new Random();
         this.searchStrategy = searchStrategy;
     }
 
@@ -50,11 +48,11 @@ public class OptimizedSearchHandler<T> {
             }
 
             if (bestNeighbor != null) {
-                noImprovements++;
-            } else {
                 currentEntity = bestNeighbor;
                 currentScore = bestNeighborScore;
                 noImprovements = 0;
+            } else {
+                noImprovements++;
             }
         }
 
@@ -70,7 +68,7 @@ public class OptimizedSearchHandler<T> {
         return filteredEntities.stream()
                 .map(entity -> new ScoredEntity<>(entity,
                         searchStrategy.scoreCalculation(entity, criteria)))
-                .sorted(Comparator.comparingDouble(ScoredEntity::getScore).reversed())
+                .sorted(Comparator.comparingDouble((ScoredEntity<T> se) -> se.getScore()).reversed())
                 .limit(topEntities)
                 .map(ScoredEntity::getEntity)
                 .collect(Collectors.toList());
