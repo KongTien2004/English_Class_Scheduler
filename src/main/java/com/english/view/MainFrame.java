@@ -1,9 +1,6 @@
 package com.english.view;
 
-import com.english.view.panel.CenterPanel;
-import com.english.view.panel.DashboardPanel;
-import com.english.view.panel.MentorPanel;
-import com.english.view.panel.StudentPanel;
+import com.english.view.panel.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,12 +16,12 @@ public class MainFrame extends JFrame {
     private CenterPanel centerPanel;
 //    private PackagePanel packagePanel;
 //    private LearningPlanPanel learningPlanPanel;
-//    private LearningSessionPanel learningSessionPanel;
+    private LearningSessionPanel learningSessionPanel;
 //    private ProgressRecordPanel progressRecordPanel;
 //    private PurchasePanel purchasePanel;
 
     public MainFrame() {
-        setTitle("IELTS Learning Center Management System");
+        setTitle("IELTS Class Scheduler");
         setSize(1400, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -55,7 +52,7 @@ public class MainFrame extends JFrame {
         centerPanel = new CenterPanel();
 //        packagePanel = new PackagePanel();
 //        learningPlanPanel = new LearningPlanPanel();
-//        learningSessionPanel = new LearningSessionPanel();
+        learningSessionPanel = new LearningSessionPanel();
 //        progressRecordPanel = new ProgressRecordPanel();
 //        purchasePanel = new PurchasePanel();
 
@@ -66,7 +63,7 @@ public class MainFrame extends JFrame {
         contentPanel.add(centerPanel, "Centers");
 //        contentPanel.add(packagePanel, "Packages");
 //        contentPanel.add(learningPlanPanel, "Learning Plans");
-//        contentPanel.add(learningSessionPanel, "Learning Sessions");
+        contentPanel.add(learningSessionPanel, "Learning Sessions");
 //        contentPanel.add(progressRecordPanel, "Progress Records");
 //        contentPanel.add(purchasePanel, "Purchases");
 
@@ -134,13 +131,13 @@ public class MainFrame extends JFrame {
                 "Learning Plans", "Learning Sessions", "Progress Records", "Purchases"
         };
 
-        String[] icons = {
-                "📊", "👨‍🎓", "👨‍🏫", "🏢", "📦",
-                "📋", "📅", "📈", "💰"
-        };
+//        String[] icons = {
+//                "📊", "👨‍🎓", "👨‍🏫", "🏢", "📦",
+//                "📋", "📅", "📈", "💰"
+//        };
 
         for (int i = 0; i < menuItems.length; i++) {
-            JButton menuButton = createMenuButton(icons[i] + " " + menuItems[i], menuItems[i]);
+            JButton menuButton = createMenuButton(menuItems[i], menuItems[i]);
             sideMenu.add(menuButton);
             sideMenu.add(Box.createRigidArea(new Dimension(0, 5)));
         }
