@@ -69,6 +69,18 @@ public class MentorController {
         return mentorService.getMentorById(mentorId);
     }
 
+    public List<Mentor> getAvailableMentors() {
+        return mentorService.getAllMentors();
+    }
+
+    public List<Mentor> getMentorTeachGeneral() {
+        return mentorService.getMentorTeachGeneral();
+    }
+
+    public List<Mentor> getMentorTeachAcademic() {
+        return mentorService.getMentorTeachAcademic();
+    }
+
     public int totalMentors() {
         return mentorService.totalMentors();
     }

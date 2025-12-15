@@ -74,6 +74,10 @@ public class CenterController {
         return centerService.getCentersByName(centerName);
     }
 
+    public List<Center> getCentersByAddress(String address) {
+        return centerService.getCentersByAddress(address);
+    }
+
     public boolean centerExists(String centerId) {
         return centerService.centerExists(centerId);
     }

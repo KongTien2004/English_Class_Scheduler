@@ -69,6 +69,14 @@ public class RoomController {
         return roomService.getAllRooms();
     }
 
+    public List<Room> getAvailableRooms() {
+        return roomService.getAvailableRooms();
+    }
+
+    public List<Room> getRoomByCenter (String centerId) {
+        return roomService.getRoomByCenter(centerId);
+    }
+
     public int totalRooms() {
         return roomService.totalRooms();
     }

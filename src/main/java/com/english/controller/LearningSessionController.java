@@ -69,6 +69,10 @@ public class LearningSessionController {
         return learningSessionService.getAllLearningSessions();
     }
 
+    public List<LearningSession> getSessionByPlan (String planId) {
+        return learningSessionService.getSessionByPlan(planId);
+    }
+
     public int totalLearningSessions() {
         return learningSessionService.totalLearningSessions();
     }
