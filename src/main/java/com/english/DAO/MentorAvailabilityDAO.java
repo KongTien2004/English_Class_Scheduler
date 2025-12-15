@@ -35,9 +35,9 @@ public class MentorAvailabilityDAO {
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, mentorAvailability.getMentorId());
             statement.setString(2, mentorAvailability.getDayOfWeek().toString());
-            statement.setTime(4, java.sql.Time.valueOf(mentorAvailability.getStartTime()));
-            statement.setTime(5, java.sql.Time.valueOf(mentorAvailability.getEndTime()));
-            statement.setString(6, mentorAvailability.getAvailabilityId());
+            statement.setTime(3, java.sql.Time.valueOf(mentorAvailability.getStartTime()));
+            statement.setTime(4, java.sql.Time.valueOf(mentorAvailability.getEndTime()));
+            statement.setString(5, mentorAvailability.getAvailabilityId());
 
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
