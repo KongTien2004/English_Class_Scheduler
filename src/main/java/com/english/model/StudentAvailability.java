@@ -16,13 +16,13 @@ public class StudentAvailability implements Serializable {
 
     private String availabilityId;
     private String studentId;
-    private MentorAvailability.DayOfWeeks dayOfWeek;
+    private DayOfWeeks dayOfWeek;
     private LocalTime startTime, endTime;
 
     public StudentAvailability() {
     }
 
-    public StudentAvailability(String availabilityId, String studentId, MentorAvailability.DayOfWeeks dayOfWeek, LocalTime startTime, LocalTime endTime) {
+    public StudentAvailability(String availabilityId, String studentId, DayOfWeeks dayOfWeek, LocalTime startTime, LocalTime endTime) {
         this.availabilityId = availabilityId;
         this.studentId = studentId;
         this.dayOfWeek = dayOfWeek;
@@ -39,7 +39,7 @@ public class StudentAvailability implements Serializable {
         return studentId;
     }
 
-    public MentorAvailability.DayOfWeeks getDayOfWeek() {
+    public DayOfWeeks getDayOfWeek() {
         return dayOfWeek;
     }
 
@@ -60,7 +60,7 @@ public class StudentAvailability implements Serializable {
         this.studentId = studentId;
     }
 
-    public void setDayOfWeek(MentorAvailability.DayOfWeeks dayOfWeek) {
+    public void setDayOfWeek(DayOfWeeks dayOfWeek) {
         this.dayOfWeek = dayOfWeek;
     }
 
