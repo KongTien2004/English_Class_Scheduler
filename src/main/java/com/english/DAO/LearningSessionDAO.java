@@ -12,7 +12,7 @@ import java.util.List;
 
 public class LearningSessionDAO {
     public boolean insertLearningSession(LearningSession learningSession) {
-        String query = "INSERT INTO learning_session (session_id, plan_id, session_name, session_type, scheduled_time, actual_start, actual_end, location, session_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO learning_session (session_id, plan_id, session_number, session_type, scheduled_time, actual_start, actual_end, location, session_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection connection = DBConnect.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -34,12 +34,12 @@ public class LearningSessionDAO {
     }
 
     public boolean updateLearningSession(LearningSession learningSession) {
-        String query = "UPDATE learning_session SET plan_id=?, session_name=?, session_type=?, scheduled_time=?, actual_start=?, actual_end=?, location=?, session_status=? WHERE session_id = ?";
+        String query = "UPDATE learning_session SET plan_id=?, session_number=?, session_type=?, scheduled_time=?, actual_start=?, actual_end=?, location=?, session_status=? WHERE session_id = ?";
 
         try (Connection connection = DBConnect.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, learningSession.getPlanId());
-            statement.setString(2, learningSession.getSessionId());
+            statement.setInt(2, learningSession.getSessionNumber());
             statement.setString(3, learningSession.getSessionType().name());
             statement.setTimestamp(4, java.sql.Timestamp.valueOf(learningSession.getScheduledTime()));
             statement.setTimestamp(5, java.sql.Timestamp.valueOf(learningSession.getActualStart()));

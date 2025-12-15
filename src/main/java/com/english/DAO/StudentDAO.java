@@ -12,7 +12,7 @@ import java.util.List;
 
 public class StudentDAO {
     public boolean insertStudent(Student student) {
-        String query = "INSERT INTO student (student_id, student_name, phone, email, ielts_type, target_band, current_listening_band, current_reading_band, current_writing_band, current_speaking_band, preferred_center_id VALUE (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO student (student_id, student_name, phone, email, ielts_type, target_band, current_listening_band, current_reading_band, current_writing_band, current_speaking_band, preferred_center_id VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection connection = DBConnect.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -36,7 +36,7 @@ public class StudentDAO {
     }
 
     public boolean updateStudent(Student student) {
-        String query = "UPDATE student SET student_name=?, phone=?, email=?, ielts_type=?, target_band=?, current_listening_band=?, current_reading_band=?, current_writing_band, current_speaking_band, preferred_center_id=? WHERE student_id=?";
+        String query = "UPDATE student SET student_name=?, phone=?, email=?, ielts_type=?, target_band=?, current_listening_band=?, current_reading_band=?, current_writing_band=?, current_speaking_band=?, preferred_center_id=? WHERE student_id=?";
 
         try (Connection connection = DBConnect.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -100,6 +100,7 @@ public class StudentDAO {
         student.setCurrentListeningBand(rs.getDouble("current_listening_band"));
         student.setCurrentReadingBand(rs.getDouble("current_reading_band"));
         student.setCurrentWritingBand(rs.getDouble("current_writing_band"));
+        student.setCurrentSpeakingBand(rs.getDouble("current_speaking_band"));
         student.setPreferredCenterId(rs.getString("preferred_center_id"));
 
         return student;

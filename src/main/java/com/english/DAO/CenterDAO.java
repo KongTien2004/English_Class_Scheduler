@@ -26,7 +26,7 @@ public class CenterDAO {
     }
 
     public boolean updateCenter(Center center) {
-        String query = "UPDATE center SET center_name=?, center_address=? WHERE center_id=?";
+        String query = "UPDATE center SET center_name=?, address=? WHERE center_id=?";
         try (Connection connection = DBConnect.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, center.getCenterName());
@@ -106,6 +106,6 @@ public class CenterDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return null;
+        return centers;
     }
 }
