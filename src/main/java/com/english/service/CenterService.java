@@ -46,6 +46,11 @@ public class CenterService {
         return centerDAO.getCenterByName(centerName);
     }
 
+    public List<Center> getCentersByAddress(String address) {
+        if (address == null || address.trim().isEmpty()) return getAllCenters();
+        return centerDAO.getCenterByAddress(address);
+    }
+
     public int totalNumberOfCenters() {
         return getAllCenters().size();
     }

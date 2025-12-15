@@ -36,6 +36,10 @@ public class StudentService {
         return studentDAO.getStudentById(studentId);
     }
 
+    public List<Student> getStudentByTargetBand (double targetBand) {
+        return studentDAO.getStudentByTargetBand(targetBand);
+    }
+
     private boolean validateStudent(Student student) {
         if (student == null) return false;
         if (student.getStudentId() == null || student.getStudentId().trim().isEmpty()) return false;

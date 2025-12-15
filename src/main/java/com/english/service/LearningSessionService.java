@@ -36,6 +36,10 @@ public class LearningSessionService {
         return learningSessionDAO.getAllLearningSessions();
     }
 
+    public List<LearningSession> getSessionByPlan (String planId) {
+        return learningSessionDAO.getSessionsByPlan(planId);
+    }
+
     private boolean validateSession(LearningSession learningSession) {
         if (learningSession == null) return false;
         if (learningSession.getSessionId() == null) return false;

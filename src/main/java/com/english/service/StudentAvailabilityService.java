@@ -15,10 +15,10 @@ public class StudentAvailabilityService {
     }
 
     public boolean updateStudentAvailability(StudentAvailability studentAvailability) {
-        return studentAvailabilityDAO.updateMentorAvailability(studentAvailability);
+        return studentAvailabilityDAO.updateStudentAvailability(studentAvailability);
     }
 
     public boolean deleteStudentAvailability(StudentAvailability studentAvailability) {
-        return studentAvailabilityDAO.deleteMentorAvailability(studentAvailability);
+        return studentAvailabilityDAO.deleteStudentAvailability(studentAvailability);
     }
 }

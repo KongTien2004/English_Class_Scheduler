@@ -37,6 +37,18 @@ public class MentorService {
         return mentorDAO.getMentorById(mentorId);
     }
 
+    public List<Mentor> getAvailableMentor() {
+        return mentorDAO.getAvailableMentors();
+    }
+
+    public List<Mentor> getMentorTeachGeneral() {
+        return mentorDAO.getMentorTeachGeneral();
+    }
+
+    public List<Mentor> getMentorTeachAcademic() {
+        return mentorDAO.getMentorTeachAcademic();
+    }
+
     private boolean validateMentor(Mentor mentor) {
         if (mentor == null) return false;
         if (mentor.getMentorId() == null || mentor.getMentorId().trim().isEmpty()) return false;

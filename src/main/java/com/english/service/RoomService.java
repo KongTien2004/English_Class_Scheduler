@@ -36,6 +36,14 @@ public class RoomService {
         return roomDAO.getAllRooms();
     }
 
+    public List<Room> getRoomByCenter (String centerId) {
+        return roomDAO.getRoomByCenter(centerId);
+    }
+
+    public List<Room> getAvailableRooms() {
+        return roomDAO.getAvailableRooms();
+    }
+
     private boolean validateRoom(Room room) {
         if (room == null) return false;
         if (room.getRoomId() == null || room.getRoomId().isEmpty()) return false;
