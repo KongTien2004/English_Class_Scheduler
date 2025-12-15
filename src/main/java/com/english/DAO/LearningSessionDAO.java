@@ -117,4 +117,22 @@ public class LearningSessionDAO {
 
         return learningSession;
     }
+
+    public List<LearningSession> getSessionsByPlan (String planId) {
+        String query = "SELECT * FROM learning_session WHERE plan_id = ?";
+        List<LearningSession> learningSessions = new ArrayList<>();
+
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, planId);
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                learningSessions.add(mapResultSetToLearningSession(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return learningSessions;
+    }
 }

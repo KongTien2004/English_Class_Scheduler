@@ -12,7 +12,7 @@ import java.util.List;
 
 public class MentorDAO {
     public boolean insertMentor(Mentor mentor) {
-        String query = "INSERT INTO mentor (mentor_id, mentor_name, email, certified_band, can_teach_general, can_teach_academic, is_available VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO mentor (mentor_id, mentor_name, email, certified_band, can_teach_general, can_teach_academic, is_available) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection connection = DBConnect.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -109,5 +109,56 @@ public class MentorDAO {
         }
 
         return null;
+    }
+
+    public List<Mentor> getAvailableMentors() {
+        String query = "SELECT * FROM mentor WHERE is_available=1";
+        List<Mentor> mentors = new ArrayList<>();
+
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                mentors.add(mapResultSetToMentor(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return mentors;
+    }
+
+    public List<Mentor> getMentorTeachGeneral() {
+        String query = "SELECT * FROM mentor WHERE can_teach_general=1";
+        List<Mentor> generalMentors = new ArrayList<>();
+
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                generalMentors.add(mapResultSetToMentor(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return generalMentors;
+    }
+
+    public List<Mentor> getMentorTeachAcademic() {
+        String query = "SELECT * FROM mentor WHERE can_teach_academic=1";
+        List<Mentor> academicMentors = new ArrayList<>();
+
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                academicMentors.add(mapResultSetToMentor(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return academicMentors;
     }
 }

@@ -108,4 +108,51 @@ public class RoomDAO {
 
         return rooms;
     }
+
+    public List<Room> getRoomByCenter(String centerId) {
+        String query = "SELECT * FROM room WHERE center_id=?";
+        List<Room> rooms = new ArrayList<>();
+
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, centerId);
+            ResultSet rs = statement.executeQuery();
+            while(rs.next()) {
+                rooms.add(new Room(
+                        rs.getString("room_id"),
+                        rs.getString("room_name"),
+                        rs.getString("center_id"),
+                        rs.getInt("capacity"),
+                        rs.getBoolean("is_available")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return rooms;
+    }
+
+    public List<Room> getAvailableRooms() {
+        String query = "SELECT * FROM room WHERE is_available=1";
+        List<Room> rooms = new ArrayList<>();
+
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query);) {
+            ResultSet rs = statement.executeQuery();
+            while(rs.next()) {
+                rooms.add(new Room(
+                        rs.getString("room_id"),
+                        rs.getString("room_name"),
+                        rs.getString("center_id"),
+                        rs.getInt("capacity"),
+                        rs.getBoolean("is_available")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return rooms;
+    }
 }

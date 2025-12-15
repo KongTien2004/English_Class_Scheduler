@@ -12,7 +12,7 @@ import java.util.List;
 
 public class StudentDAO {
     public boolean insertStudent(Student student) {
-        String query = "INSERT INTO student (student_id, student_name, phone, email, ielts_type, target_band, current_listening_band, current_reading_band, current_writing_band, current_speaking_band, preferred_center_id VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO student (student_id, student_name, phone, email, ielts_type, target_band, current_listening_band, current_reading_band, current_writing_band, current_speaking_band, preferred_center_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection connection = DBConnect.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -121,5 +121,23 @@ public class StudentDAO {
         }
 
         return null;
+    }
+
+    public List<Student> getStudentByTargetBand(double targetBand) {
+        String query = "SELECT * FROM student WHERE target_band=?";
+        List<Student> students = new ArrayList<>();
+
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setDouble(1, targetBand);
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                students.add(mapResultSetToStudent(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return students;
     }
 }

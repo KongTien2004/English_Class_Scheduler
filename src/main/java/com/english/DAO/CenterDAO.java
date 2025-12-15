@@ -90,13 +90,13 @@ public class CenterDAO {
     }
 
     public List<Center> getCenterByName(String centerName) {
-        String query = "SELECT * FROM center WHERE center_name=?";
+        String query = "SELECT * FROM center WHERE center_name LIKE ?";
         List<Center> centers = new ArrayList<>();
         try (Connection connection = DBConnect.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, "%" + centerName + "%");
             ResultSet rs = statement.executeQuery();
-            if (rs.next()) {
+            while (rs.next()) {
                 centers.add(new Center(
                     rs.getString("center_id"),
                     rs.getString("center_name"),
@@ -106,6 +106,28 @@ public class CenterDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return centers;
+    }
+
+    public List<Center> getCenterByAddress(String address) {
+        String query = "SELECT * FROM center WHERE center_address LIKE ?";
+        List<Center> centers = new ArrayList<>();
+
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, "%" + address + "%");
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                centers.add(new Center(
+                        rs.getString("center_id"),
+                        rs.getString("center_name"),
+                        rs.getString("address")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         return centers;
     }
 }

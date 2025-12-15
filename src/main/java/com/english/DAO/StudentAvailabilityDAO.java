@@ -9,7 +9,7 @@ import java.sql.SQLException;
 
 public class StudentAvailabilityDAO {
     public boolean insertStudentAvailability(StudentAvailability studentAvailability) {
-        String query = "INSERT INTO mentor_availability (availability_id, student_id, day_of_week, start_time, end_time) VALUES (?, ?, ?, ?, ?)";
+        String query = "INSERT INTO student_availability (availability_id, student_id, day_of_week, start_time, end_time) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection connection = DBConnect.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -27,8 +27,8 @@ public class StudentAvailabilityDAO {
         return false;
     }
 
-    public boolean updateMentorAvailability(StudentAvailability studentAvailability) {
-        String query = "UPDATE mentor_availability SET student_id=?, day_of_week=?, start_time=?, end_time=? WHERE availability_id=?";
+    public boolean updateStudentAvailability(StudentAvailability studentAvailability) {
+        String query = "UPDATE student_availability SET student_id=?, day_of_week=?, start_time=?, end_time=? WHERE availability_id=?";
 
         try (Connection connection = DBConnect.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -46,8 +46,8 @@ public class StudentAvailabilityDAO {
         return false;
     }
 
-    public boolean deleteMentorAvailability(StudentAvailability mentorAvailability) {
-        String query = "DELETE FROM mentor_availability WHERE availability_id=?";
+    public boolean deleteStudentAvailability(StudentAvailability mentorAvailability) {
+        String query = "DELETE FROM student_availability WHERE availability_id=?";
 
         try (Connection connection = DBConnect.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
