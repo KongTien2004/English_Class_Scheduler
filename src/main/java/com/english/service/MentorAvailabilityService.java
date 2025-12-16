@@ -6,6 +6,10 @@ import com.english.model.MentorAvailability;
 public class MentorAvailabilityService {
     private MentorAvailabilityDAO mentorAvailabilityDAO;
 
+    public MentorAvailabilityService(MentorAvailabilityDAO mentorAvailabilityDAO) {
+        this.mentorAvailabilityDAO = mentorAvailabilityDAO;
+    }
+
     public MentorAvailabilityDAO getMentorAvailabilityDAO() {
         return mentorAvailabilityDAO;
     }
