@@ -7,10 +7,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Scheduler {
@@ -62,54 +59,11 @@ public class Scheduler {
         List<Mentor> allMentors = mentorController.getAllMentors();
         if (allMentors.isEmpty()) return null;
 
-        // Lọc mentor khả dụng
-        List<Mentor> availableMentors = allMentors.stream()
-                .filter(Mentor::isAvailable)
-                .filter(m -> canTeachIELTSType(m, student.getIeltsType()))
-                .filter(m -> m.getCertifiedBand() >= student.getTargetBand())
-                .collect(Collectors.toList());
+        Map<String, Object> criteria = new HashMap<>();
+        criteria.put("ieltsType", student.getIeltsType().name());
+        criteria.put("targetBand", student.getTargetBand());
 
-        if (availableMentors.isEmpty()) {
-            availableMentors = allMentors.stream()
-                    .filter(Mentor::isAvailable)
-                    .collect(Collectors.toList());
-        }
-
-        if (availableMentors.isEmpty()) return null;
-
-        // Bắt đầu với mentor ngẫu nhiên
-        Mentor currentMentor = availableMentors.get(random.nextInt(availableMentors.size()));
-        double currentScore = scoreMentor(currentMentor, student);
-
-        int noImprovementCount = 0;
-
-        for (int i = 0; i < MAX_ITERATIONS && noImprovementCount < NO_IMPROVEMENT_THRESHOLD; i++) {
-            // Lấy các mentor láng giềng (random subset)
-            List<Mentor> neighbors = getRandomNeighbors(availableMentors, currentMentor, 5);
-
-            Mentor bestNeighbor = null;
-            double bestScore = currentScore;
-
-            // Tìm mentor tốt nhất trong các láng giềng
-            for (Mentor neighbor : neighbors) {
-                double score = scoreMentor(neighbor, student);
-                if (score > bestScore) {
-                    bestNeighbor = neighbor;
-                    bestScore = score;
-                }
-            }
-
-            // Di chuyển đến láng giềng tốt hơn
-            if (bestNeighbor != null) {
-                currentMentor = bestNeighbor;
-                currentScore = bestScore;
-                noImprovementCount = 0;
-            } else {
-                noImprovementCount++;
-            }
-        }
-
-        return currentMentor;
+        return SearchHandler.mentorHandler().findOptimalEntity(allMentors, criteria);
     }
 
     /**
@@ -138,7 +92,7 @@ public class Scheduler {
         int noImprovementCount = 0;
 
         for (int i = 0; i < MAX_ITERATIONS && noImprovementCount < NO_IMPROVEMENT_THRESHOLD; i++) {
-            List<Room> neighbors = getRandomNeighbors(availableRooms, currentRoom, 3);
+            List<Room> neighbors = getRandomNeighbor(availableRooms, currentRoom, 3);
 
             Room bestNeighbor = null;
             double bestScore = currentScore;
@@ -218,7 +172,7 @@ public class Scheduler {
         int noImprovementCount = 0;
 
         for (int i = 0; i < MAX_ITERATIONS && noImprovementCount < NO_IMPROVEMENT_THRESHOLD; i++) {
-            List<LocalDateTime> neighbors = getRandomNeighbors(possibleTimes, currentTime, 5);
+            List<LocalDateTime> neighbors = getRandomNeighbor(possibleTimes, currentTime, 5);
 
             LocalDateTime bestTime = null;
             double bestScore = currentScore;
@@ -247,41 +201,6 @@ public class Scheduler {
         }
 
         return currentProposal;
-    }
-
-    /**
-     * Đánh giá độ phù hợp của mentor với student
-     */
-    private double scoreMentor(Mentor mentor, Student student) {
-        double score = 0.0;
-
-        // Điểm cho việc có thể dạy loại IELTS phù hợp
-        if (canTeachIELTSType(mentor, student.getIeltsType())) {
-            score += 40.0;
-        }
-
-        // Điểm cho certified band
-        double bandDiff = mentor.getCertifiedBand() - student.getTargetBand();
-        if (bandDiff >= 0) {
-            if (bandDiff <= 1.0) {
-                score += 30.0; // Hoàn hảo
-            } else if (bandDiff <= 2.0) {
-                score += 20.0; // Tốt
-            } else {
-                score += 10.0; // Chấp nhận được
-            }
-        }
-
-        // Điểm cho tính khả dụng
-        if (mentor.isAvailable()) {
-            score += 20.0;
-        }
-
-        // Điểm cho workload (số lượng learning plan hiện tại)
-        int mentorWorkload = countMentorActivePlans(mentor.getMentorId());
-        score += Math.max(0, 10.0 - mentorWorkload); // Ưu tiên mentor ít việc hơn
-
-        return score;
     }
 
     /**
@@ -334,17 +253,6 @@ public class Scheduler {
         }
 
         return score;
-    }
-
-    /**
-     * Kiểm tra mentor có thể dạy loại IELTS không
-     */
-    private boolean canTeachIELTSType(Mentor mentor, Student.IELTSType ieltsType) {
-        if (ieltsType == Student.IELTSType.GENERAL) {
-            return mentor.isCanTeachGeneral();
-        } else {
-            return mentor.isCanTeachAcademic();
-        }
     }
 
     /**
@@ -409,7 +317,7 @@ public class Scheduler {
     /**
      * Lấy các phần tử láng giềng ngẫu nhiên
      */
-    private <T> List<T> getRandomNeighbors(List<T> list, T current, int count) {
+    private <T> List<T> getRandomNeighbor(List<T> list, T current, int count) {
         List<T> neighbors = new ArrayList<>(list);
         neighbors.remove(current);
         Collections.shuffle(neighbors, random);
