@@ -1,13 +1,8 @@
 package com.english.algorithm;
 
-import com.english.algorithm.strategy.CenterSearchStrategy;
-import com.english.algorithm.strategy.LearningSessionSearchStrategy;
-import com.english.algorithm.strategy.MentorSearchStrategy;
-import com.english.algorithm.strategy.StudentSearchStrategy;
-import com.english.model.Center;
-import com.english.model.LearningSession;
-import com.english.model.Mentor;
-import com.english.model.Student;
+import com.english.algorithm.strategy.*;
+import com.english.model.*;
+import com.english.model.Package;
 
 public class SearchHandler {
     public static OptimizedSearchHandler<Center> centerHandler() {
@@ -24,5 +19,17 @@ public class SearchHandler {
 
     public static OptimizedSearchHandler<LearningSession> learningSessionHandler() {
         return new OptimizedSearchHandler<>(new LearningSessionSearchStrategy());
+    }
+
+    public static OptimizedSearchHandler<Room> roomSearchHandler() {
+        return new OptimizedSearchHandler<>(new RoomSearchStrategy());
+    }
+
+    public static OptimizedSearchHandler<Package> packageSearchHandler() {
+        return new OptimizedSearchHandler<>(new PackageSearchStrategy());
+    }
+
+    public static OptimizedSearchHandler<LearningPlan> learningPlanSearchHandler() {
+        return new OptimizedSearchHandler<>(new LearningPlanSearchStrategy());
     }
 }
