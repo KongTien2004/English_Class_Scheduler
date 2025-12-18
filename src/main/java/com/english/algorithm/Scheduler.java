@@ -25,6 +25,9 @@ public class Scheduler {
     private final Random random;
     private static final int MAX_ITERATIONS = 100;
     private static final int NO_IMPROVEMENT_THRESHOLD = 10;
+    private static final int SESSION_DURATION_HOURS = 2;
+    private static final int SESSIONS_PER_WEEK = 2;
+    private static final int COURSE_DURATION_WEEKS = 25;
 
     public Scheduler(StudentController studentController,
                      MentorController mentorController,
@@ -69,25 +72,25 @@ public class Scheduler {
     /**
      * Tìm phòng học phù hợp cho buổi học
      */
-    public Room findOptimalRoom(String centerId, LocalDateTime scheduledTime, LearningSession.SessionType sessionType) {
+    public Room findOptimalRoom(String centerId, LocalDateTime scheduledTime,
+                                LearningSession.SessionType sessionType, String planId) {
         if (sessionType == LearningSession.SessionType.ONLINE) {
-            return null; // Không cần phòng cho online
+            return null;
         }
 
         List<Room> allRooms = roomController.getAllRooms();
 
-        // Lọc phòng theo trung tâm và khả dụng
         List<Room> availableRooms = allRooms.stream()
                 .filter(r -> r.getCenterId().equals(centerId))
                 .filter(Room::isAvailable)
                 .filter(r -> isRoomAvailableAtTime(r, scheduledTime))
+                .filter(r -> hasEnoughCapacity(r, planId))
                 .collect(Collectors.toList());
 
         if (availableRooms.isEmpty()) return null;
 
-        // Bắt đầu với phòng ngẫu nhiên
         Room currentRoom = availableRooms.get(random.nextInt(availableRooms.size()));
-        double currentScore = scoreRoom(currentRoom, scheduledTime);
+        double currentScore = scoreRoom(currentRoom, scheduledTime, planId);
 
         int noImprovementCount = 0;
 
@@ -98,7 +101,7 @@ public class Scheduler {
             double bestScore = currentScore;
 
             for (Room neighbor : neighbors) {
-                double score = scoreRoom(neighbor, scheduledTime);
+                double score = scoreRoom(neighbor, scheduledTime, planId);
                 if (score > bestScore) {
                     bestNeighbor = neighbor;
                     bestScore = score;
@@ -118,33 +121,156 @@ public class Scheduler {
     }
 
     /**
+     * Tạo lịch cho lớp học sao cho lớp học phải đủ số buổi và thời lượng theo khóa học
+     */
+    /**
      * Tạo lịch học tối ưu cho learning plan
      */
     public List<ScheduleProposal> createOptimalSchedule(String planId) {
         LearningPlan plan = learningPlanController.getLearningPlanById(planId);
-        if (plan == null) return Collections.emptyList();
+        if (plan == null) {
+            System.err.println("Lỗi: Không tìm thấy learning plan: " + planId);
+            return Collections.emptyList();
+        }
+
+        if (!hasValidSessionCount(plan)) {
+            System.err.println("Lỗi: Số buổi học không hợp lệ cho plan: " + planId);
+            return Collections.emptyList();
+        }
 
         Student student = studentController.getStudentById(plan.getStudentId());
         Mentor mentor = mentorController.getMentorById(plan.getMentorId());
 
-        if (student == null || mentor == null) return Collections.emptyList();
+        if (student == null || mentor == null) {
+            System.err.println("Lỗi: Không tìm thấy student hoặc mentor");
+            return Collections.emptyList();
+        }
 
         List<ScheduleProposal> proposals = new ArrayList<>();
         LocalDate currentDate = plan.getStartDate();
 
-        // Tạo lịch cho tất cả các buổi học
+        int failedAttempts = 0;
+        final int MAX_FAILED_ATTEMPTS = 3;
+
         for (int sessionNum = 1; sessionNum <= plan.getTotalSessions(); sessionNum++) {
             ScheduleProposal proposal = findOptimalTimeSlot(
                     student, mentor, currentDate, sessionNum, plan.getPlanId()
             );
 
-            if (proposal != null) {
+            if (proposal != null && isValidSessionDuration(proposal.scheduledTime)) {
                 proposals.add(proposal);
                 currentDate = proposal.scheduledTime.toLocalDate().plusDays(1);
+                failedAttempts = 0;
+            } else {
+                failedAttempts++;
+                System.err.println("Cảnh báo: Không thể tạo lịch cho buổi " + sessionNum);
+
+                if (failedAttempts >= MAX_FAILED_ATTEMPTS) {
+                    System.err.println("Lỗi: Không thể tạo lịch sau " +
+                            MAX_FAILED_ATTEMPTS + " lần thử");
+                    break;
+                }
+
+                currentDate = currentDate.plusDays(1);
+                sessionNum--;
             }
         }
 
+        if (!validateScheduleCompleteness(planId, proposals)) {
+            System.err.println("Cảnh báo: Lịch học không đầy đủ!");
+        }
+
         return proposals;
+    }
+
+    /**
+     * Tạo LearningSession từ ScheduleProposal với validation
+     */
+    public LearningSession createValidatedSession(ScheduleProposal proposal,
+                                                  String sessionId,
+                                                  String planId,
+                                                  int sessionNumber) {
+        if (!isValidSessionDuration(proposal.scheduledTime)) {
+            throw new IllegalArgumentException(
+                    "Buổi học không hợp lệ: thời gian phải trong 8:00-21:00 và kéo dài 2 tiếng"
+            );
+        }
+
+        LocalDateTime endTime = proposal.scheduledTime.plusHours(SESSION_DURATION_HOURS);
+
+        LearningSession session = new LearningSession();
+        session.setSessionId(sessionId);
+        session.setPlanId(planId);
+        session.setSessionNumber(sessionNumber);
+        session.setSessionType(proposal.sessionType);
+        session.setScheduledTime(proposal.scheduledTime);
+        session.setActualStart(proposal.scheduledTime);
+        session.setActualEnd(endTime);
+        session.setLocation(proposal.centerId);
+        session.setSessionStatus(LearningSession.SessionStatus.SCHEDULED);
+
+        return session;
+    }
+
+
+// Helper methods
+    /**
+     * Check thời lượng buổi học đúng 2 tiếng và trong khung giờ 8:00-21:00
+     */
+    private boolean isValidSessionDuration(LocalDateTime startTime) {
+        LocalDateTime endTime = startTime.plusHours(SESSION_DURATION_HOURS);
+
+        if (startTime.getHour() < 8) {
+            return false;
+        }
+
+        if (endTime.getHour() > 21 || (endTime.getHour() == 21 && endTime.getMinute() > 0)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Check số buổi học đủ theo khóa học
+     */
+    private boolean hasValidSessionCount(LearningPlan plan) {
+        if (plan == null) return false;
+
+        if (plan.getTotalSessions() <= 0) {
+            return false;
+        }
+
+        if (plan.getRemainingSessions() < 0 ||
+                plan.getRemainingSessions() > plan.getTotalSessions()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Check lịch học có đủ số buổi theo yêu cầu không
+     */
+    private boolean validateScheduleCompleteness(String planId, List<ScheduleProposal> proposals) {
+        LearningPlan plan = learningPlanController.getLearningPlanById(planId);
+        if (plan == null) return false;
+
+        if (proposals.size() != plan.getTotalSessions()) {
+            System.err.println("Lỗi: Số buổi học không đủ. Cần: " +
+                    plan.getTotalSessions() + ", Có: " + proposals.size());
+            return false;
+        }
+
+        for (ScheduleProposal proposal : proposals) {
+            if (!isValidSessionDuration(proposal.scheduledTime)) {
+                System.err.println("Lỗi: Buổi học " + proposal.scheduledTime +
+                        " không hợp lệ (phải 2 tiếng trong 8:00-21:00)");
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -153,12 +279,10 @@ public class Scheduler {
     private ScheduleProposal findOptimalTimeSlot(Student student, Mentor mentor,
                                                  LocalDate startDate, int sessionNumber,
                                                  String planId) {
-        // Danh sách các khung giờ có thể (8:00 - 20:00, mỗi buổi 2 tiếng)
         List<LocalDateTime> possibleTimes = generatePossibleTimeSlots(startDate);
 
         if (possibleTimes.isEmpty()) return null;
 
-        // Bắt đầu với thời gian ngẫu nhiên
         LocalDateTime currentTime = possibleTimes.get(random.nextInt(possibleTimes.size()));
         double currentScore = scoreTimeSlot(currentTime, student, mentor);
 
@@ -204,22 +328,66 @@ public class Scheduler {
     }
 
     /**
-     * Đánh giá độ phù hợp của phòng học
+     * Kiểm tra xem lớp học có sức chứa vượt quá 20 người không?
+     * (Gồm giáo viên, học viên, trợ giảng)
      */
-    private double scoreRoom(Room room, LocalDateTime scheduledTime) {
+    private boolean hasEnoughCapacity(Room room, String planId) {
+        LearningPlan plan = learningPlanController.getLearningPlanById(planId);
+        if (plan == null) return false;
+
+        int studentCount = 1;
+        int mentorCount = 1;
+        int totalMembers = studentCount + mentorCount;
+
+        return totalMembers <= room.getCapacity();
+    }
+
+    /**
+     * Đánh giá phòng học có sức chứa lý tưởng hay không?
+     */
+    private double scoreRoom(Room room, LocalDateTime scheduledTime, String planId) {
         double score = 0.0;
 
-        // Điểm cho capacity
-        score += Math.min(30.0, room.getCapacity() * 3.0);
-
-        // Điểm cho tính khả dụng
         if (room.isAvailable()) {
+            score += 20.0;
+        }
+
+        if (isRoomAvailableAtTime(room, scheduledTime)) {
             score += 30.0;
         }
 
-        // Điểm cho việc không bị trùng lịch
-        if (isRoomAvailableAtTime(room, scheduledTime)) {
-            score += 40.0;
+        LearningPlan plan = learningPlanController.getLearningPlanById(planId);
+        if (plan != null) {
+            int studentCount = 1;
+            int mentorCount = 1;
+//            int assistantCount = 0;
+            int totalPeople = studentCount + mentorCount; //+ assistantCount
+
+            if (totalPeople <= room.getCapacity()) {
+                double utilizationRate = (double) totalPeople / room.getCapacity();
+
+                if (utilizationRate >= 0.5 && utilizationRate <= 0.8) {
+                    score += 30.0;
+                } else if (utilizationRate >= 0.3 && utilizationRate < 0.5) {
+                    score += 20.0;
+                } else if (utilizationRate > 0.8) {
+                    score += 25.0;
+                } else {
+                    score += 10.0;
+                }
+            } else {
+                score += 0.0;
+            }
+        }
+
+        if (room.getCapacity() >= 10 && room.getCapacity() <= 15) {
+            score += 20.0;
+        } else if (room.getCapacity() >= 15 && room.getCapacity() <= 20) {
+            score += 15.0;
+        } else if (room.getCapacity() < 10) {
+            score += 10.0;
+        } else {
+            score += 5.0;
         }
 
         return score;
@@ -231,7 +399,6 @@ public class Scheduler {
     private double scoreTimeSlot(LocalDateTime time, Student student, Mentor mentor) {
         double score = 0.0;
 
-        // Điểm cho giờ vàng (9:00 - 11:00 và 14:00 - 16:00)
         int hour = time.getHour();
         if ((hour >= 9 && hour < 11) || (hour >= 14 && hour < 16)) {
             score += 30.0;
@@ -239,7 +406,6 @@ public class Scheduler {
             score += 15.0;
         }
 
-        // Điểm cho ngày trong tuần (tránh cuối tuần)
         DayOfWeek dayOfWeek = time.getDayOfWeek();
         if (dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY) {
             score += 30.0;
@@ -247,7 +413,6 @@ public class Scheduler {
             score += 10.0;
         }
 
-        // Điểm cho việc không bị trùng lịch
         if (!hasConflictingSession(time, mentor.getMentorId())) {
             score += 40.0;
         }
@@ -266,7 +431,7 @@ public class Scheduler {
     }
 
     /**
-     * Kiểm tra phòng có khả dụng tại thời điểm không
+     * Kiểm tra các lớp học có bị trùng phòng học không
      */
     private boolean isRoomAvailableAtTime(Room room, LocalDateTime time) {
         return learningSessionController.getAllLearningSessions().stream()
@@ -275,7 +440,7 @@ public class Scheduler {
     }
 
     /**
-     * Kiểm tra có buổi học trùng lịch không
+     * Kiểm tra giáo viên dạy có dạy cùng lúc 2 lớp không
      */
     private boolean hasConflictingSession(LocalDateTime time, String mentorId) {
         return learningSessionController.getAllLearningSessions().stream()
@@ -296,22 +461,33 @@ public class Scheduler {
     }
 
     /**
-     * Tạo danh sách các khung giờ có thể trong 7 ngày tới
+     * Tạo danh sách các khung giờ 8:00 - 21:00
      */
     private List<LocalDateTime> generatePossibleTimeSlots(LocalDate startDate) {
         List<LocalDateTime> timeSlots = new ArrayList<>();
+        final int START_HOUR = 8;
+        final int END_HOUR = 21;
 
         for (int day = 0; day < 7; day++) {
             LocalDate date = startDate.plusDays(day);
 
-            // Các khung giờ: 8:00, 10:00, 14:00, 16:00, 18:00
-            int[] hours = {8, 10, 14, 16, 18};
-            for (int hour : hours) {
-                timeSlots.add(LocalDateTime.of(date, LocalTime.of(hour, 0)));
+            for (int hour = START_HOUR; hour <= END_HOUR - SESSION_DURATION_HOURS; hour++) {
+                LocalDateTime timeSlot = LocalDateTime.of(date, LocalTime.of(hour, 0));
+
+                if (isValidSessionDuration(timeSlot)) {
+                    timeSlots.add(timeSlot);
+                }
             }
         }
 
         return timeSlots;
+    }
+
+    /**
+     * Tính tổng thời lượng khóa học (giờ)
+     */
+    private int calculateTotalCourseDuration(LearningPlan plan) {
+        return plan.getTotalSessions() * SESSION_DURATION_HOURS;
     }
 
     /**
