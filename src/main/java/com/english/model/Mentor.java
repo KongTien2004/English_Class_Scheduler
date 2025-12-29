@@ -10,11 +10,12 @@ public class Mentor implements Serializable {
     private boolean canTeachGeneral;
     private boolean canTeachAcademic;
     private boolean isAvailable;
+    private String mentorAddress;
 
     public Mentor() {}
 
     public Mentor(String mentorId, String mentorName, String email, double certifiedBand,
-                  boolean canTeachGeneral, boolean canTeachAcademic, boolean isAvailable) {
+                  boolean canTeachGeneral, boolean canTeachAcademic, boolean isAvailable, String mentorAddress) {
         this.mentorId = mentorId;
         this.mentorName = mentorName;
         this.email = email;
@@ -22,6 +23,7 @@ public class Mentor implements Serializable {
         this.canTeachGeneral = canTeachGeneral;
         this.canTeachAcademic = canTeachAcademic;
         this.isAvailable = isAvailable;
+        this.mentorAddress = mentorAddress;
     }
 
 //Getter
@@ -53,7 +55,11 @@ public class Mentor implements Serializable {
         return isAvailable;
     }
 
-//Setter
+    public String getMentorAddress() {
+        return mentorAddress;
+    }
+
+    //Setter
     public void setMentorId(String mentorId) {
         this.mentorId = mentorId;
     }
@@ -80,5 +86,9 @@ public class Mentor implements Serializable {
 
     public void setAvailable(boolean available) {
         isAvailable = available;
+    }
+
+    public void setMentorAddress(String mentorAddress) {
+        this.mentorAddress = mentorAddress;
     }
 }

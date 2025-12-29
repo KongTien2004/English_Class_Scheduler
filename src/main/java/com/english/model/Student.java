@@ -16,13 +16,14 @@ public class Student implements Serializable {
     private double currentWritingBand;
     private double currentSpeakingBand;
     private String preferredCenterId;
+    private String studentAddress;
 
     public Student() {
     }
 
     public Student(String studentId, String studentName, String phone, String email, IELTSType ieltsType, double targetBand,
                    double currentListeningBand, double currentReadingBand, double currentWritingBand, double currentSpeakingBand,
-                   String preferredCenterId) {
+                   String preferredCenterId, String studentAddress) {
         this.studentId = studentId;
         this.studentName = studentName;
         this.phone = phone;
@@ -34,6 +35,7 @@ public class Student implements Serializable {
         this.currentWritingBand = currentWritingBand;
         this.currentSpeakingBand = currentSpeakingBand;
         this.preferredCenterId = preferredCenterId;
+        this.studentAddress = studentAddress;
     }
 
 //Getter
@@ -81,7 +83,11 @@ public class Student implements Serializable {
         return preferredCenterId;
     }
 
-//Setter
+    public String getStudentAddress() {
+        return studentAddress;
+    }
+
+    //Setter
     public void setStudentId(String studentId) {
         this.studentId = studentId;
     }
@@ -124,5 +130,9 @@ public class Student implements Serializable {
 
     public void setPreferredCenterId(String preferredCenterId) {
         this.preferredCenterId = preferredCenterId;
+    }
+
+    public void setStudentAddress(String studentAddress) {
+        this.studentAddress = studentAddress;
     }
 }
