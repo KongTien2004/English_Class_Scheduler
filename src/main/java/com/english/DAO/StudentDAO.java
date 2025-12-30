@@ -157,4 +157,22 @@ public class StudentDAO {
 
         return students;
     }
+
+    public List<Student> getStudentsByIELTSType(Student.IELTSType studentIELTSType) {
+        String query = "SELECT * FROM student WHERE ielts_type=?";
+        List<Student> students = new ArrayList<>();
+
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, ieltsType.name());
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                students.add(mapResultSetToStudent(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return students;
+    }
 }

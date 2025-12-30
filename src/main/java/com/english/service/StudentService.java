@@ -44,6 +44,10 @@ public class StudentService {
         return studentDAO.getStudentsByAddress(studentAddress);
     }
 
+    public List<Student> getStudentsByIELTSType (Student.IELTSType studentIELTSType) {
+        return studentDAO.getStudentsByIELTSType(studentIELTSType);
+    }
+
     private boolean validateStudent(Student student) {
         if (student == null) return false;
         if (student.getStudentId() == null || student.getStudentId().trim().isEmpty()) return false;
