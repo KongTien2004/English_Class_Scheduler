@@ -70,7 +70,7 @@ public class MentorController {
     }
 
     public List<Mentor> getAvailableMentors() {
-        return mentorService.getAllMentors();
+        return mentorService.getAvailableMentors();
     }
 
     public List<Mentor> getMentorTeachGeneral() {
@@ -79,6 +79,10 @@ public class MentorController {
 
     public List<Mentor> getMentorTeachAcademic() {
         return mentorService.getMentorTeachAcademic();
+    }
+
+    public List<Mentor> getMentorsByAddress(String mentorAddress) {
+        return mentorService.getMentorsByAddress(mentorAddress);
     }
 
     public int totalMentors() {

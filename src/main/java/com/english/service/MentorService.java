@@ -37,7 +37,7 @@ public class MentorService {
         return mentorDAO.getMentorById(mentorId);
     }
 
-    public List<Mentor> getAvailableMentor() {
+    public List<Mentor> getAvailableMentors() {
         return mentorDAO.getAvailableMentors();
     }
 
@@ -48,6 +48,8 @@ public class MentorService {
     public List<Mentor> getMentorTeachAcademic() {
         return mentorDAO.getMentorTeachAcademic();
     }
+
+    public List<Mentor> getMentorsByAddress(String mentorAddress) {return mentorDAO.getMentorsByAddress(mentorAddress);}
 
     private boolean validateMentor(Mentor mentor) {
         if (mentor == null) return false;

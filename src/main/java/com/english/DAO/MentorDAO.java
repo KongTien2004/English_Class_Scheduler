@@ -161,4 +161,21 @@ public class MentorDAO {
 
         return academicMentors;
     }
+
+    public List<Mentor> getMentorsByAddress(String mentorAddress) {
+        String query = "SELECT * FROM mentor WHERE mentor_address=?";
+        List<Mentor> mentors = new ArrayList<>();
+
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query);
+             ResultSet rs = statement.executeQuery()) {
+            while (rs.next()) {
+                mentors.add(mapResultSetToMentor(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return mentors;
+    }
 }
