@@ -40,6 +40,10 @@ public class StudentService {
         return studentDAO.getStudentByTargetBand(targetBand);
     }
 
+    public List<Student> getStudentsByAddress(String studentAddress) {
+        return studentDAO.getStudentsByAddress(studentAddress);
+    }
+
     private boolean validateStudent(Student student) {
         if (student == null) return false;
         if (student.getStudentId() == null || student.getStudentId().trim().isEmpty()) return false;

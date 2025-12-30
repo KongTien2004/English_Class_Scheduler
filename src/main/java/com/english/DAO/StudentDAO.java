@@ -140,4 +140,21 @@ public class StudentDAO {
 
         return students;
     }
+
+    public List<Student> getStudentsByAddress(String studentAddress) {
+        String query = "SELECT * FROM student WHERE student_address=?";
+        List<Student> students = new ArrayList<>();
+
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query);
+             ResultSet rs = statement.executeQuery()) {
+            while (rs.next()) {
+                students.add(mapResultSetToStudent(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return students;
+    }
 }

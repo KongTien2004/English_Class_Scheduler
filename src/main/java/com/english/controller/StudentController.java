@@ -72,6 +72,9 @@ public class StudentController {
     public List<Student> getStudentByTargetBand (double targetBand) {
         return studentService.getStudentByTargetBand(targetBand);
     }
+    public List<Student> getStudentsByAddress(String studentAddress) {
+        return studentService.getStudentsByAddress(studentAddress);
+    }
 
     public int totalStudents() {
         return studentService.totalStudents();
