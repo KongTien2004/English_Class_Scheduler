@@ -61,7 +61,8 @@ public class CenterDAO {
                 centers.add(new Center(
                     rs.getString("center_id"),
                     rs.getString("center_name"),
-                    rs.getString("address")
+                    rs.getString("address"),
+                    rs.getString("city")
                 ));
             }
         } catch (SQLException e) {
@@ -80,7 +81,8 @@ public class CenterDAO {
                 return new Center(
                     rs.getString("center_id"),
                     rs.getString("center_name"),
-                    rs.getString("address")
+                    rs.getString("address"),
+                    rs.getString("city")
                 );
             }
         } catch (SQLException e) {
@@ -100,7 +102,8 @@ public class CenterDAO {
                 centers.add(new Center(
                     rs.getString("center_id"),
                     rs.getString("center_name"),
-                    rs.getString("address")
+                    rs.getString("address"),
+                    rs.getString("city")
                 ));
             }
         } catch (SQLException e) {
@@ -110,7 +113,7 @@ public class CenterDAO {
     }
 
     public List<Center> getCenterByAddress(String address) {
-        String query = "SELECT * FROM center WHERE center_address LIKE ?";
+        String query = "SELECT * FROM center WHERE address LIKE ?";
         List<Center> centers = new ArrayList<>();
 
         try (Connection connection = DBConnect.getConnection();
@@ -121,7 +124,8 @@ public class CenterDAO {
                 centers.add(new Center(
                         rs.getString("center_id"),
                         rs.getString("center_name"),
-                        rs.getString("address")
+                        rs.getString("address"),
+                        rs.getString("city")
                 ));
             }
         } catch (SQLException e) {

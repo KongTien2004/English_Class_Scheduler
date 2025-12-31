@@ -141,8 +141,9 @@ public class AssistantDAO {
         List<Assistant> assistants = new ArrayList<>();
 
         try (Connection connection = DBConnect.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query);
-             ResultSet rs = statement.executeQuery()) {
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, assistantAddress);
+            ResultSet rs = statement.executeQuery();
             while (rs.next()) {
                 assistants.add(new Assistant(
                     rs.getString("assistant_id"),

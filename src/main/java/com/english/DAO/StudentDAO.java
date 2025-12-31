@@ -146,8 +146,9 @@ public class StudentDAO {
         List<Student> students = new ArrayList<>();
 
         try (Connection connection = DBConnect.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query);
-             ResultSet rs = statement.executeQuery()) {
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, studentAddress);
+            ResultSet rs = statement.executeQuery();
             while (rs.next()) {
                 students.add(mapResultSetToStudent(rs));
             }
@@ -164,7 +165,7 @@ public class StudentDAO {
 
         try (Connection connection = DBConnect.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, ieltsType.name());
+            statement.setString(1, studentIELTSType.name());
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
                 students.add(mapResultSetToStudent(rs));

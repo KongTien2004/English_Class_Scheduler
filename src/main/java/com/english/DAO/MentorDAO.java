@@ -167,8 +167,9 @@ public class MentorDAO {
         List<Mentor> mentors = new ArrayList<>();
 
         try (Connection connection = DBConnect.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query);
-             ResultSet rs = statement.executeQuery()) {
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, mentorAddress);
+            ResultSet rs = statement.executeQuery();
             while (rs.next()) {
                 mentors.add(mapResultSetToMentor(rs));
             }
