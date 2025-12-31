@@ -32,4 +32,20 @@ public class SearchHandler {
     public static OptimizedSearchHandler<LearningPlan> learningPlanSearchHandler() {
         return new OptimizedSearchHandler<>(new LearningPlanSearchStrategy());
     }
+
+    public static OptimizedSearchHandler<Assistant> assistantSearchHandler() {
+        return new OptimizedSearchHandler<>(new AssistantSearchStrategy());
+    }
+
+    public static OptimizedSearchHandler<MentorAvailability> mentorAvailabilitySearchHandler() {
+        return new OptimizedSearchHandler<>(new MentorAvailabilitySearchStrategy());
+    }
+
+    public static OptimizedSearchHandler<StudentAvailability> studentAvailabilitySearchHandler() {
+        return new OptimizedSearchHandler<>(new StudentAvailabilitySearchStrategy());
+    }
+
+    public static OptimizedSearchHandler<StudentPreference> studentPreferenceSearchHandler() {
+        return new OptimizedSearchHandler<>(new StudentPreferenceSearchStrategy());
+    }
 }
