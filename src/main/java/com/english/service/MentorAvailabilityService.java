@@ -3,6 +3,8 @@ package com.english.service;
 import com.english.DAO.MentorAvailabilityDAO;
 import com.english.model.MentorAvailability;
 
+import java.util.List;
+
 public class MentorAvailabilityService {
     private MentorAvailabilityDAO mentorAvailabilityDAO;
 
@@ -24,5 +26,12 @@ public class MentorAvailabilityService {
 
     public boolean deleteMentorAvailability(MentorAvailability mentorAvailability) {
         return mentorAvailabilityDAO.deleteMentorAvailability(mentorAvailability);
+    }
+
+    public List<MentorAvailability> getAvailabilityByMentorId(String mentorId) {
+        if (mentorId == null || mentorId.trim().isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+        return mentorAvailabilityDAO.getAvailabilityByMentorId(mentorId);
     }
 }

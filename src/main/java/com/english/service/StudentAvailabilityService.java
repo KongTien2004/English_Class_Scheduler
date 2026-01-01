@@ -3,6 +3,8 @@ package com.english.service;
 import com.english.DAO.StudentAvailabilityDAO;
 import com.english.model.StudentAvailability;
 
+import java.util.List;
+
 public class StudentAvailabilityService {
     private StudentAvailabilityDAO studentAvailabilityDAO;
 
@@ -20,5 +22,12 @@ public class StudentAvailabilityService {
 
     public boolean deleteStudentAvailability(StudentAvailability studentAvailability) {
         return studentAvailabilityDAO.deleteStudentAvailability(studentAvailability);
+    }
+
+    public List<StudentAvailability> getAvailabilityByStudentId(String studentId) {
+        if (studentId == null || studentId.trim().isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+        return studentAvailabilityDAO.getAvailabilityByStudentId(studentId);
     }
 }
