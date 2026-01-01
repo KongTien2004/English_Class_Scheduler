@@ -601,10 +601,13 @@ public class Scheduler {
         LocalDateTime currentTime = possibleTimes.get(random.nextInt(possibleTimes.size()));
         double currentScore = scoreTimeSlot(currentTime, student, mentor);
 
+        // SC2: Tìm center gần nhất với địa chỉ học viên - Soft Constraint 2
+        String bestCenterId = findNearestCenterToStudent(student, preferredCenterId);
+        
         ScheduleProposal currentProposal = new ScheduleProposal(
                 currentTime,
                 LearningSession.SessionType.OFFLINE,
-                preferredCenterId,
+                bestCenterId != null ? bestCenterId : preferredCenterId,
                 currentScore
         );
 
@@ -630,7 +633,7 @@ public class Scheduler {
                 currentProposal = new ScheduleProposal(
                         currentTime,
                         LearningSession.SessionType.OFFLINE,
-                        preferredCenterId,
+                        bestCenterId != null ? bestCenterId : preferredCenterId,
                         currentScore
                 );
                 noImprovementCount = 0;
@@ -640,6 +643,55 @@ public class Scheduler {
         }
 
         return currentProposal;
+    }
+
+    /**
+     * SC2: Tìm center gần nhất với địa chỉ học viên - Soft Constraint 2
+     */
+    private String findNearestCenterToStudent(Student student, String preferredCenterId) {
+        if (student == null || student.getStudentAddress() == null) {
+            return preferredCenterId;
+        }
+        
+        List<Center> allCenters = centerController.getAllCenters();
+        if (allCenters.isEmpty()) {
+            return preferredCenterId;
+        }
+        
+        // Ưu tiên center gần địa chỉ học viên
+        Center nearestCenter = null;
+        int maxScore = 0;
+        
+        for (Center center : allCenters) {
+            int score = 0;
+            
+            // Kiểm tra center có gần địa chỉ học viên không
+            if (isCenterNearStudentAddress(student.getStudentAddress(), center)) {
+                score += 100; // Điểm cao nhất cho center gần
+            }
+            
+            // Nếu là center ưa thích, thêm điểm
+            if (preferredCenterId != null && preferredCenterId.equals(center.getCenterId())) {
+                score += 50;
+            }
+            
+            if (score > maxScore) {
+                maxScore = score;
+                nearestCenter = center;
+            }
+        }
+        
+        // Nếu tìm được center gần, trả về center đó
+        if (nearestCenter != null && maxScore > 0) {
+            return nearestCenter.getCenterId();
+        }
+        
+        // Nếu không, trả về preferred center hoặc center đầu tiên
+        if (preferredCenterId != null && centerController.centerExists(preferredCenterId)) {
+            return preferredCenterId;
+        }
+        
+        return allCenters.get(0).getCenterId();
     }
 
     private double scoreRoom(Room room, LocalDateTime scheduledTime, String planId) {
@@ -662,25 +714,101 @@ public class Scheduler {
             if (totalPeople <= room.getCapacity()) {
                 double utilizationRate = (double) totalPeople / room.getCapacity();
 
+                // SC4: Ưu tiên phòng học đều được sử dụng - Soft Constraint 4
                 if (utilizationRate >= 0.5 && utilizationRate <= 0.8) {
-                    score += 30.0;
+                    score += 40.0; // Tăng điểm cho utilization tốt (50-80%)
                 } else if (utilizationRate >= 0.3 && utilizationRate < 0.5) {
-                    score += 20.0;
-                } else if (utilizationRate > 0.8) {
-                    score += 25.0;
+                    score += 25.0; // Điểm vừa cho utilization thấp (30-50%)
+                } else if (utilizationRate > 0.8 && utilizationRate <= 0.95) {
+                    score += 30.0; // Điểm tốt cho utilization cao nhưng không quá đông (80-95%)
+                } else if (utilizationRate > 0.95) {
+                    score -= 20.0; // Penalty cho phòng quá đông (>95%)
                 } else {
-                    score += 10.0;
+                    score -= 15.0; // Penalty cho phòng trống (<30%)
                 }
             }
             
-            // Sử dụng centerController để kiểm tra center có phù hợp không
-            Center center = centerController.getCenterById(room.getCenterId());
-            if (center != null) {
-                score += 5.0; // Bonus điểm nếu center hợp lệ
+            // SC2: Ưu tiên center gần nơi cư trú của học viên - Soft Constraint 2
+            Student student = studentController.getStudentById(plan.getStudentId());
+            if (student != null) {
+                Center center = centerController.getCenterById(room.getCenterId());
+                if (center != null) {
+                    score += 5.0; // Base điểm cho center hợp lệ
+                    
+                    // Kiểm tra center có gần địa chỉ học viên không
+                    if (isCenterNearStudentAddress(student.getStudentAddress(), center)) {
+                        score += 35.0; // Bonus lớn nếu center gần
+                    } else if (student.getPreferredCenterId() != null && 
+                               student.getPreferredCenterId().equals(center.getCenterId())) {
+                        score += 20.0; // Bonus nếu là center ưa thích
+                    }
+                }
             }
         }
 
         return score;
+    }
+
+    /**
+     * SC2: Kiểm tra center có gần địa chỉ học viên không - Soft Constraint 2
+     * So sánh đơn giản dựa trên tên quận/huyện trong địa chỉ
+     */
+    private boolean isCenterNearStudentAddress(String studentAddress, Center center) {
+        if (studentAddress == null || center == null || center.getAddress() == null) {
+            return false;
+        }
+        
+        // Lấy tên quận/huyện từ địa chỉ (ví dụ: "Quận 9", "Bình Thạnh")
+        String studentDistrict = extractDistrict(studentAddress);
+        String centerDistrict = extractDistrict(center.getAddress());
+        
+        // Nếu có city, cũng kiểm tra city
+        if (center.getCity() != null) {
+            String centerCityDistrict = extractDistrict(center.getCity());
+            if (studentDistrict != null && !studentDistrict.isEmpty()) {
+                if (studentDistrict.equalsIgnoreCase(centerDistrict) || 
+                    studentDistrict.equalsIgnoreCase(centerCityDistrict)) {
+                    return true;
+                }
+            }
+        }
+        
+        // So sánh trực tiếp district
+        if (studentDistrict != null && centerDistrict != null && 
+            !studentDistrict.isEmpty() && !centerDistrict.isEmpty()) {
+            return studentDistrict.equalsIgnoreCase(centerDistrict);
+        }
+        
+        return false;
+    }
+
+    /**
+     * Trích xuất tên quận/huyện từ địa chỉ
+     * Ví dụ: "123 Đường ABC, Quận 9, TP.HCM" -> "Quận 9"
+     */
+    private String extractDistrict(String address) {
+        if (address == null || address.trim().isEmpty()) {
+            return "";
+        }
+        
+        // Tìm pattern "Quận X", "Huyện X", "Q.X", etc.
+        String[] parts = address.split(",");
+        for (String part : parts) {
+            String trimmed = part.trim();
+            if (trimmed.toLowerCase().contains("quận") || 
+                trimmed.toLowerCase().contains("huyện") ||
+                trimmed.toLowerCase().startsWith("q.") ||
+                trimmed.toLowerCase().startsWith("q")) {
+                return trimmed;
+            }
+        }
+        
+        // Nếu không tìm thấy, trả về phần cuối cùng (thường là quận/huyện)
+        if (parts.length > 0) {
+            return parts[parts.length - 1].trim();
+        }
+        
+        return "";
     }
 
     private double scoreTimeSlot(LocalDateTime time, Student student, Mentor mentor) {
@@ -697,12 +825,18 @@ public class Scheduler {
             score += 15.0;
         }
 
-        // Ưu tiên ngày trong tuần
+        // SC1: Ưu tiên ngày trong tuần (tránh cuối tuần)
         DayOfWeek dayOfWeek = time.getDayOfWeek();
         if (dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY) {
             score += 30.0;
         } else {
-            score += 10.0;
+            // Penalty cho cuối tuần (Soft Constraint 1)
+            score += 5.0; // Giảm điểm đáng kể cho cuối tuần
+        }
+
+        // SC1: Ưu tiên buổi tối (18:00-21:00) - Soft Constraint 1
+        if (hour >= 18 && hour < 21) {
+            score += 25.0; // Bonus điểm cho buổi tối
         }
 
         // Sử dụng student preferences để tăng điểm nếu khớp
@@ -757,7 +891,33 @@ public class Scheduler {
             score += 40.0;
         }
 
+        // SC3: Tránh xếp nhiều lớp liên tiếp trong 1 ngày cho mentor - Soft Constraint 3
+        int classesOnSameDay = countMentorClassesOnDay(mentor.getMentorId(), time.toLocalDate());
+        if (classesOnSameDay >= 5) {
+            score -= 50.0; // Penalty lớn nếu >= 5 lớp trong 1 ngày
+        } else if (classesOnSameDay >= 3) {
+            score -= 20.0; // Penalty vừa nếu >= 3 lớp
+        } else if (classesOnSameDay >= 2) {
+            score -= 5.0; // Penalty nhỏ nếu >= 2 lớp
+        }
+
         return score;
+    }
+
+    /**
+     * SC3: Đếm số lớp mentor dạy trong cùng 1 ngày - Soft Constraint 3
+     */
+    private int countMentorClassesOnDay(String mentorId, LocalDate date) {
+        if (mentorId == null || date == null) return 0;
+        
+        return (int) learningSessionController.getAllLearningSessions().stream()
+                .filter(s -> {
+                    LearningPlan plan = learningPlanController.getLearningPlanById(s.getPlanId());
+                    return plan != null && plan.getMentorId().equals(mentorId);
+                })
+                .filter(s -> s.getSessionStatus() == LearningSession.SessionStatus.SCHEDULED)
+                .filter(s -> s.getScheduledTime().toLocalDate().equals(date))
+                .count();
     }
 
     /**
