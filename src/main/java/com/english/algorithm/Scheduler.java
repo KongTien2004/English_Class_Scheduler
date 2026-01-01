@@ -694,6 +694,15 @@ public class Scheduler {
         return allCenters.get(0).getCenterId();
     }
 
+    private int roomUsageCount(String roomId, LocalDate from, LocalDate to) {
+        return (int) learningSessionController.getAllLearningSessions().stream()
+                .filter(s -> s.getLocation() != null && s.getLocation().contains(roomId))
+                .filter(s -> {
+                    LocalDate d = s.getScheduledTime().toLocalDate();
+                    return (!d.isBefore(from) && !d.isAfter(to));
+                }).count();
+    }
+
     private double scoreRoom(Room room, LocalDateTime scheduledTime, String planId) {
         double score = 0.0;
 
@@ -745,6 +754,9 @@ public class Scheduler {
                 }
             }
         }
+
+        int usage = roomUsageCount(room.getRoomId(), LocalDate.now().minusWeeks(1), LocalDate.now());
+        if (usage > 5) score -= (usage - 5) * 5;
 
         return score;
     }
@@ -901,6 +913,9 @@ public class Scheduler {
             score -= 5.0; // Penalty nhỏ nếu >= 2 lớp
         }
 
+        int sessionsToday = countMentorSessionsOnDate(mentor.getMentorId(), time.toLocalDate());
+        if (sessionsToday >= 3) score -= 30.0;
+
         return score;
     }
 
@@ -916,6 +931,16 @@ public class Scheduler {
                     return plan != null && plan.getMentorId().equals(mentorId);
                 })
                 .filter(s -> s.getSessionStatus() == LearningSession.SessionStatus.SCHEDULED)
+                .filter(s -> s.getScheduledTime().toLocalDate().equals(date))
+                .count();
+    }
+
+    private int countMentorSessionsOnDate(String mentorId, LocalDate date) {
+        return (int) learningSessionController.getAllLearningSessions().stream()
+                .filter(s -> {
+                    LearningPlan p = learningPlanController.getLearningPlanById(s.getPlanId());
+                    return p != null && p.getMentorId().equals(mentorId);
+                })
                 .filter(s -> s.getScheduledTime().toLocalDate().equals(date))
                 .count();
     }
