@@ -4,6 +4,7 @@ import com.english.model.MentorAvailability;
 import com.english.service.MentorAvailabilityService;
 
 import javax.swing.*;
+import java.util.List;
 
 public class MentorAvailabilityController {
     private MentorAvailabilityService mentorAvailabilityService;
@@ -58,5 +59,9 @@ public class MentorAvailabilityController {
                         JOptionPane.ERROR_MESSAGE);
             }
         }
+    }
+
+    public List<MentorAvailability> getAvailabilityByMentorId(String mentorId) {
+        return mentorAvailabilityService.getAvailabilityByMentorId(mentorId);
     }
 }

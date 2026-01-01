@@ -4,6 +4,7 @@ import com.english.model.StudentAvailability;
 import com.english.service.StudentAvailabilityService;
 
 import javax.swing.*;
+import java.util.List;
 
 public class StudentAvailabilityController {
     private StudentAvailabilityService studentAvailabilityService;
@@ -58,5 +59,9 @@ public class StudentAvailabilityController {
                         JOptionPane.ERROR_MESSAGE);
             }
         }
+    }
+
+    public List<StudentAvailability> getAvailabilityByStudentId(String studentId) {
+        return studentAvailabilityService.getAvailabilityByStudentId(studentId);
     }
 }
