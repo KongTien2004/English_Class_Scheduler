@@ -5,8 +5,11 @@ import com.english.model.MentorAvailability;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MentorAvailabilityDAO {
     public boolean insertMentorAvailability(MentorAvailability mentorAvailability) {
@@ -59,5 +62,29 @@ public class MentorAvailabilityDAO {
         }
 
         return false;
+    }
+
+    public List<MentorAvailability> getAvailabilityByMentorId(String mentorId) {
+        String query = "SELECT * FROM mentor_availability WHERE mentor_id=?";
+        List<MentorAvailability> availabilities = new ArrayList<>();
+
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, mentorId);
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                availabilities.add(new MentorAvailability(
+                    rs.getString("availability_id"),
+                    rs.getString("mentor_id"),
+                    MentorAvailability.DayOfWeeks.valueOf(rs.getString("day_of_week")),
+                    rs.getTime("start_time").toLocalTime(),
+                    rs.getTime("end_time").toLocalTime()
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return availabilities;
     }
 }

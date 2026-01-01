@@ -5,7 +5,10 @@ import com.english.model.StudentAvailability;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class StudentAvailabilityDAO {
     public boolean insertStudentAvailability(StudentAvailability studentAvailability) {
@@ -58,5 +61,29 @@ public class StudentAvailabilityDAO {
         }
 
         return false;
+    }
+
+    public List<StudentAvailability> getAvailabilityByStudentId(String studentId) {
+        String query = "SELECT * FROM student_availability WHERE student_id=?";
+        List<StudentAvailability> availabilities = new ArrayList<>();
+
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, studentId);
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                availabilities.add(new StudentAvailability(
+                    rs.getString("availability_id"),
+                    rs.getString("student_id"),
+                    StudentAvailability.DayOfWeeks.valueOf(rs.getString("day_of_week")),
+                    rs.getTime("start_time").toLocalTime(),
+                    rs.getTime("end_time").toLocalTime()
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return availabilities;
     }
 }
