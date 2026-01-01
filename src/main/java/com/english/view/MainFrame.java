@@ -13,12 +13,15 @@ public class MainFrame extends JFrame {
     private DashboardPanel dashboardPanel;
     private StudentPanel studentPanel;
     private MentorPanel mentorPanel;
+    private AssistantPanel assistantPanel;
+    private RoomPanel roomPanel;
     private CenterPanel centerPanel;
-//    private PackagePanel packagePanel;
-//    private LearningPlanPanel learningPlanPanel;
+    private PackagePanel packagePanel;
+    private LearningPlanPanel learningPlanPanel;
     private LearningSessionPanel learningSessionPanel;
-//    private ProgressRecordPanel progressRecordPanel;
-//    private PurchasePanel purchasePanel;
+    private MentorAvailabilityPanel mentorAvailabilityPanel;
+    private StudentAvailabilityPanel studentAvailabilityPanel;
+    private StudentPreferencePanel studentPreferencePanel;
 
     public MainFrame() {
         setTitle("IELTS Class Scheduler");
@@ -49,23 +52,29 @@ public class MainFrame extends JFrame {
         dashboardPanel = new DashboardPanel();
         studentPanel = new StudentPanel();
         mentorPanel = new MentorPanel();
+        assistantPanel = new AssistantPanel();
+        roomPanel = new RoomPanel();
         centerPanel = new CenterPanel();
-//        packagePanel = new PackagePanel();
-//        learningPlanPanel = new LearningPlanPanel();
+        packagePanel = new PackagePanel();
+        learningPlanPanel = new LearningPlanPanel();
         learningSessionPanel = new LearningSessionPanel();
-//        progressRecordPanel = new ProgressRecordPanel();
-//        purchasePanel = new PurchasePanel();
+        mentorAvailabilityPanel = new MentorAvailabilityPanel();
+        studentAvailabilityPanel = new StudentAvailabilityPanel();
+        studentPreferencePanel = new StudentPreferencePanel();
 
         // Add panels to card layout
         contentPanel.add(dashboardPanel, "Dashboard");
         contentPanel.add(studentPanel, "Students");
         contentPanel.add(mentorPanel, "Mentors");
+        contentPanel.add(assistantPanel, "Assistants");
+        contentPanel.add(roomPanel, "Rooms");
         contentPanel.add(centerPanel, "Centers");
-//        contentPanel.add(packagePanel, "Packages");
-//        contentPanel.add(learningPlanPanel, "Learning Plans");
+        contentPanel.add(packagePanel, "Packages");
+        contentPanel.add(learningPlanPanel, "Learning Plans");
         contentPanel.add(learningSessionPanel, "Learning Sessions");
-//        contentPanel.add(progressRecordPanel, "Progress Records");
-//        contentPanel.add(purchasePanel, "Purchases");
+        contentPanel.add(mentorAvailabilityPanel, "Mentor Avalabilities");
+        contentPanel.add(studentAvailabilityPanel, "Student Availabilities");
+        contentPanel.add(studentPreferencePanel, "Student Preferences");
 
         add(contentPanel, BorderLayout.CENTER);
 
