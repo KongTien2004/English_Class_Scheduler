@@ -2,6 +2,7 @@ package com.english.algorithm;
 
 import com.english.controller.*;
 import com.english.model.*;
+import com.english.model.Package;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -10,6 +11,22 @@ import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Class Scheduler - Tạo lịch học tối ưu cho học viên
+ * 
+ * Sử dụng các controller sau:
+ * - studentController: Lấy thông tin học viên
+ * - mentorController: Lấy thông tin giảng viên
+ * - assistantController: Tìm assistant phù hợp và tính capacity
+ * - centerController: Validate center và lấy thông tin center
+ * - roomController: Tìm phòng học phù hợp
+ * - learningPlanController: Lấy thông tin learning plan
+ * - learningSessionController: Quản lý learning sessions
+ * - packageController: Validate plan với package hợp lệ
+ * - studentPreferenceController: Lấy preferences của học viên để tối ưu scheduling
+ * - mentorAvailabilityController: Lấy availability của mentor để filter và score time slots
+ * - studentAvailabilityController: Lấy availability của student để filter và score time slots
+ */
 public class Scheduler {
     private final StudentController studentController;
     private final MentorController mentorController;
@@ -31,7 +48,6 @@ public class Scheduler {
     private static final int MAX_ROOM_CAPACITY = 20;
     private static final int SESSION_DURATION_HOURS = 3;
     private static final int SESSIONS_PER_WEEK = 2;
-    private static final int COURSE_DURATION_WEEKS = 12;
 
     private Map<String, List<LearningSession>> sessionsByMentorCache;
 
@@ -133,6 +149,12 @@ public class Scheduler {
             return null;
         }
 
+        // Sử dụng centerController để validate center tồn tại
+        if (centerId != null && !centerController.centerExists(centerId)) {
+            System.err.println("Center không tồn tại: " + centerId);
+            return null;
+        }
+
         // HARD CONSTRAINT 3: Kiểm tra giờ trong khung hoạt động
         if (!isWithinOperatingHours(scheduledTime)) {
             System.err.println("Thời gian không nằm trong khung giờ hoạt động (8:00-21:00)");
@@ -196,6 +218,11 @@ public class Scheduler {
                 return Collections.emptyList();
             }
 
+            // Sử dụng packageController để validate plan có khớp với package hợp lệ không
+            if (!validatePlanAgainstPackages(plan)) {
+                System.err.println("Cảnh báo: Plan không khớp với package hợp lệ nào");
+            }
+
             // HARD CONSTRAINT 5: Kiểm tra số buổi học hợp lệ
             if (!hasValidSessionCount(plan)) {
                 System.err.println("Lỗi: Số buổi học không hợp lệ cho plan: " + planId);
@@ -220,15 +247,17 @@ public class Scheduler {
             LocalDate currentDate = plan.getStartDate();
 
             int sessionCount = 0;
-            int weekCount = 0;
             int sessionsThisWeek = 0;
 
+            int maxWeeks = (plan.getTotalSessions() / SESSIONS_PER_WEEK) + 2;
+            int weeksSearched = 0;
+
             // Tạo lịch theo yêu cầu: 2 buổi/tuần
-            while (sessionCount < plan.getTotalSessions() && weekCount < COURSE_DURATION_WEEKS * 2) {
+            while (sessionCount < plan.getTotalSessions() && weeksSearched < maxWeeks * 2) {
                 if (sessionsThisWeek >= SESSIONS_PER_WEEK) {
                     currentDate = currentDate.plusWeeks(1).with(DayOfWeek.MONDAY);
                     sessionsThisWeek = 0;
-                    weekCount++;
+                    weeksSearched++;
                     continue;
                 }
 
@@ -245,7 +274,7 @@ public class Scheduler {
                     currentDate = currentDate.plusDays(1);
                 }
 
-                if (currentDate.isAfter(plan.getStartDate().plusWeeks(COURSE_DURATION_WEEKS * 3))) {
+                if (currentDate.isAfter(plan.getStartDate().plusWeeks(maxWeeks * 2))) {
                     System.err.println("Không thể tạo lịch học trong thời gian hợp lý");
                     break;
                 }
@@ -319,6 +348,24 @@ public class Scheduler {
     }
 
     /**
+     * Sử dụng packageController để validate plan có khớp với package hợp lệ
+     */
+    private boolean validatePlanAgainstPackages(LearningPlan plan) {
+        if (plan == null) return false;
+        
+        List<Package> allPackages = packageController.getAllPackages();
+        
+        // Tìm package phù hợp với plan
+        return allPackages.stream()
+                .filter(Package::isActive)
+                .anyMatch(pkg -> 
+                    pkg.getIeltsType().name().equals(plan.getIeltsType().name()) &&
+                    Math.abs(pkg.getTargetBand() - plan.getTargetBand()) < 0.5 && // Cho phép sai số nhỏ
+                    pkg.getTotalSessions() == plan.getTotalSessions()
+                );
+    }
+
+    /**
      * HARD CONSTRAINT 5: Kiểm tra số buổi học hợp lệ
      */
     private boolean hasValidSessionCount(LearningPlan plan) {
@@ -331,12 +378,6 @@ public class Scheduler {
         if (plan.getRemainingSessions() < 0 ||
                 plan.getRemainingSessions() > plan.getTotalSessions()) {
             return false;
-        }
-
-        int minimumSessions = SESSIONS_PER_WEEK * COURSE_DURATION_WEEKS;
-        if (plan.getTotalSessions() < minimumSessions) {
-            System.err.println("Cảnh báo: Số buổi học ít hơn yêu cầu tối thiểu (" +
-                    minimumSessions + " buổi)");
         }
 
         return true;
@@ -368,6 +409,7 @@ public class Scheduler {
 
     /**
      * HARD CONSTRAINT 4: Kiểm tra sức chứa phòng (≤ 20 người)
+     * Sử dụng assistantController để tìm assistant phù hợp và tính vào capacity
      */
     private boolean hasEnoughCapacity(Room room, String planId) {
         LearningPlan plan = learningPlanController.getLearningPlanById(planId);
@@ -375,8 +417,10 @@ public class Scheduler {
 
         int studentCount = 1;
         int mentorCount = 1;
-        int assistantCount = 0; // Trợ giảng (nếu có)
-
+        
+        // Sử dụng assistantController để tìm assistant phù hợp
+        int assistantCount = findSuitableAssistantCount(plan);
+        
         int totalPeople = studentCount + mentorCount + assistantCount;
 
         // HARD CONSTRAINT 4: Tổng số người ≤ 20
@@ -385,6 +429,35 @@ public class Scheduler {
         }
 
         return totalPeople <= room.getCapacity();
+    }
+
+    /**
+     * Tìm số lượng assistant phù hợp cho plan
+     * Sử dụng assistantController để tìm assistant có thể hỗ trợ loại IELTS phù hợp
+     */
+    private int findSuitableAssistantCount(LearningPlan plan) {
+        if (plan == null) return 0;
+        
+        Student student = studentController.getStudentById(plan.getStudentId());
+        if (student == null) return 0;
+        
+        List<Assistant> allAssistants = assistantController.getAllAssistants();
+        
+        // Tìm assistant phù hợp với loại IELTS của học viên
+        long suitableAssistants = allAssistants.stream()
+                .filter(Assistant::isAvailable)
+                .filter(a -> {
+                    if (student.getIeltsType() == Student.IELTSType.GENERAL) {
+                        return a.isCanSupportGeneral();
+                    } else if (student.getIeltsType() == Student.IELTSType.ACADEMIC) {
+                        return a.isCanSupportAcademic();
+                    }
+                    return false;
+                })
+                .count();
+        
+        // Có thể có tối đa 1 assistant cho mỗi session
+        return suitableAssistants > 0 ? 1 : 0;
     }
 
     /**
@@ -487,11 +560,40 @@ public class Scheduler {
 
         if (possibleTimes.isEmpty()) return null;
 
+        // Sử dụng studentPreferenceController để lọc theo preferences nếu có
+        List<StudentPreference> preferences = studentPreferenceController.getPreferenceByStudent(student.getStudentId());
+        String preferredCenterId = student.getPreferredCenterId();
+        
+        // Nếu có preferences, ưu tiên center từ preferences
+        if (!preferences.isEmpty()) {
+            String prefCenter = preferences.get(0).getPreferredCenter();
+            if (prefCenter != null && !prefCenter.trim().isEmpty()) {
+                // Sử dụng centerController để validate center
+                if (centerController.centerExists(prefCenter)) {
+                    preferredCenterId = prefCenter;
+                }
+            }
+        }
+        
+        // Validate center tồn tại
+        if (preferredCenterId != null && !centerController.centerExists(preferredCenterId)) {
+            System.err.println("Preferred center không tồn tại: " + preferredCenterId);
+            // Tìm center hợp lệ khác
+            List<Center> allCenters = centerController.getAllCenters();
+            if (!allCenters.isEmpty()) {
+                preferredCenterId = allCenters.get(0).getCenterId();
+            } else {
+                preferredCenterId = null;
+            }
+        }
+
         // Lọc các thời gian vi phạm Hard Constraints
         possibleTimes = possibleTimes.stream()
                 .filter(this::isWithinOperatingHours)
                 .filter(this::isValidSessionDuration)
                 .filter(time -> !hasMentorConflict(time, mentor.getMentorId()))
+                .filter(time -> isMentorAvailableAtTime(mentor.getMentorId(), time))
+                .filter(time -> isStudentAvailableAtTime(student.getStudentId(), time))
                 .collect(Collectors.toList());
 
         if (possibleTimes.isEmpty()) return null;
@@ -502,7 +604,7 @@ public class Scheduler {
         ScheduleProposal currentProposal = new ScheduleProposal(
                 currentTime,
                 LearningSession.SessionType.OFFLINE,
-                student.getPreferredCenterId(),
+                preferredCenterId,
                 currentScore
         );
 
@@ -528,7 +630,7 @@ public class Scheduler {
                 currentProposal = new ScheduleProposal(
                         currentTime,
                         LearningSession.SessionType.OFFLINE,
-                        student.getPreferredCenterId(),
+                        preferredCenterId,
                         currentScore
                 );
                 noImprovementCount = 0;
@@ -553,7 +655,9 @@ public class Scheduler {
 
         LearningPlan plan = learningPlanController.getLearningPlanById(planId);
         if (plan != null) {
-            int totalPeople = 2; // Student + Mentor
+            // Sử dụng assistantController để tính chính xác số người
+            int assistantCount = findSuitableAssistantCount(plan);
+            int totalPeople = 2 + assistantCount; // Student + Mentor + Assistant(s)
 
             if (totalPeople <= room.getCapacity()) {
                 double utilizationRate = (double) totalPeople / room.getCapacity();
@@ -568,6 +672,12 @@ public class Scheduler {
                     score += 10.0;
                 }
             }
+            
+            // Sử dụng centerController để kiểm tra center có phù hợp không
+            Center center = centerController.getCenterById(room.getCenterId());
+            if (center != null) {
+                score += 5.0; // Bonus điểm nếu center hợp lệ
+            }
         }
 
         return score;
@@ -576,6 +686,9 @@ public class Scheduler {
     private double scoreTimeSlot(LocalDateTime time, Student student, Mentor mentor) {
         double score = 0.0;
 
+        // Sử dụng studentPreferenceController để lấy preferences của học viên
+        List<StudentPreference> preferences = studentPreferenceController.getPreferenceByStudent(student.getStudentId());
+        
         // Ưu tiên giờ vàng (9-11h, 14-16h)
         int hour = time.getHour();
         if ((hour >= 9 && hour < 11) || (hour >= 14 && hour < 16)) {
@@ -592,12 +705,159 @@ public class Scheduler {
             score += 10.0;
         }
 
+        // Sử dụng student preferences để tăng điểm nếu khớp
+        if (!preferences.isEmpty()) {
+            for (StudentPreference pref : preferences) {
+                // Kiểm tra ngày trong tuần có khớp không
+                if (matchesDayOfWeek(dayOfWeek, pref.getDayOfWeek())) {
+                    score += 20.0; // Bonus điểm nếu khớp ngày
+                    
+                    // Kiểm tra giờ có trong khoảng preferred không
+                    LocalTime timeOfDay = time.toLocalTime();
+                    if (timeOfDay.compareTo(pref.getPreferredStart()) >= 0 && 
+                        timeOfDay.compareTo(pref.getPreferredEnd()) <= 0) {
+                        score += 25.0; // Bonus điểm cao hơn nếu khớp cả giờ
+                    }
+                }
+            }
+        }
+
+        // Sử dụng mentorAvailabilityController để tăng điểm nếu khớp với mentor availability
+        List<MentorAvailability> mentorAvailabilities = mentorAvailabilityController.getAvailabilityByMentorId(mentor.getMentorId());
+        if (!mentorAvailabilities.isEmpty()) {
+            LocalTime timeOfDay = time.toLocalTime();
+            LocalTime sessionEndTime = timeOfDay.plusHours(SESSION_DURATION_HOURS);
+            for (MentorAvailability avail : mentorAvailabilities) {
+                if (matchesDayOfWeek(dayOfWeek, avail.getDayOfWeek())) {
+                    if (timeOfDay.compareTo(avail.getStartTime()) >= 0 && 
+                        sessionEndTime.compareTo(avail.getEndTime()) <= 0) {
+                        score += 30.0; // Bonus điểm cao nếu khớp với mentor availability
+                    }
+                }
+            }
+        }
+
+        // Sử dụng studentAvailabilityController để tăng điểm nếu khớp với student availability
+        List<StudentAvailability> studentAvailabilities = studentAvailabilityController.getAvailabilityByStudentId(student.getStudentId());
+        if (!studentAvailabilities.isEmpty()) {
+            LocalTime timeOfDay = time.toLocalTime();
+            LocalTime sessionEndTime = timeOfDay.plusHours(SESSION_DURATION_HOURS);
+            for (StudentAvailability avail : studentAvailabilities) {
+                if (matchesDayOfWeek(dayOfWeek, avail.getDayOfWeek())) {
+                    if (timeOfDay.compareTo(avail.getStartTime()) >= 0 && 
+                        sessionEndTime.compareTo(avail.getEndTime()) <= 0) {
+                        score += 30.0; // Bonus điểm cao nếu khớp với student availability
+                    }
+                }
+            }
+        }
+
         // Không có xung đột lịch
         if (!hasMentorConflict(time, mentor.getMentorId())) {
             score += 40.0;
         }
 
         return score;
+    }
+
+    /**
+     * Chuyển đổi DayOfWeek (Java) sang DayOfWeeks (enum trong model)
+     */
+    private boolean matchesDayOfWeek(DayOfWeek javaDayOfWeek, StudentPreference.DayOfWeeks preferenceDay) {
+        switch (javaDayOfWeek) {
+            case MONDAY: return preferenceDay == StudentPreference.DayOfWeeks.MONDAY;
+            case TUESDAY: return preferenceDay == StudentPreference.DayOfWeeks.TUESDAY;
+            case WEDNESDAY: return preferenceDay == StudentPreference.DayOfWeeks.WEDNESDAY;
+            case THURSDAY: return preferenceDay == StudentPreference.DayOfWeeks.THURSDAY;
+            case FRIDAY: return preferenceDay == StudentPreference.DayOfWeeks.FRIDAY;
+            case SATURDAY: return preferenceDay == StudentPreference.DayOfWeeks.SATURDAY;
+            case SUNDAY: return preferenceDay == StudentPreference.DayOfWeeks.SUNDAY;
+            default: return false;
+        }
+    }
+
+    /**
+     * Chuyển đổi DayOfWeek (Java) sang DayOfWeeks (enum trong MentorAvailability)
+     */
+    private boolean matchesDayOfWeek(DayOfWeek javaDayOfWeek, MentorAvailability.DayOfWeeks availabilityDay) {
+        switch (javaDayOfWeek) {
+            case MONDAY: return availabilityDay == MentorAvailability.DayOfWeeks.MONDAY;
+            case TUESDAY: return availabilityDay == MentorAvailability.DayOfWeeks.TUESDAY;
+            case WEDNESDAY: return availabilityDay == MentorAvailability.DayOfWeeks.WEDNESDAY;
+            case THURSDAY: return availabilityDay == MentorAvailability.DayOfWeeks.THURSDAY;
+            case FRIDAY: return availabilityDay == MentorAvailability.DayOfWeeks.FRIDAY;
+            case SATURDAY: return availabilityDay == MentorAvailability.DayOfWeeks.SATURDAY;
+            case SUNDAY: return availabilityDay == MentorAvailability.DayOfWeeks.SUNDAY;
+            default: return false;
+        }
+    }
+
+    /**
+     * Chuyển đổi DayOfWeek (Java) sang DayOfWeeks (enum trong StudentAvailability)
+     */
+    private boolean matchesDayOfWeek(DayOfWeek javaDayOfWeek, StudentAvailability.DayOfWeeks availabilityDay) {
+        switch (javaDayOfWeek) {
+            case MONDAY: return availabilityDay == StudentAvailability.DayOfWeeks.MONDAY;
+            case TUESDAY: return availabilityDay == StudentAvailability.DayOfWeeks.TUESDAY;
+            case WEDNESDAY: return availabilityDay == StudentAvailability.DayOfWeeks.WEDNESDAY;
+            case THURSDAY: return availabilityDay == StudentAvailability.DayOfWeeks.THURSDAY;
+            case FRIDAY: return availabilityDay == StudentAvailability.DayOfWeeks.FRIDAY;
+            case SATURDAY: return availabilityDay == StudentAvailability.DayOfWeeks.SATURDAY;
+            case SUNDAY: return availabilityDay == StudentAvailability.DayOfWeeks.SUNDAY;
+            default: return false;
+        }
+    }
+
+    /**
+     * Sử dụng mentorAvailabilityController để kiểm tra mentor có available tại thời điểm này không
+     */
+    private boolean isMentorAvailableAtTime(String mentorId, LocalDateTime time) {
+        if (mentorId == null || time == null) return false;
+        
+        List<MentorAvailability> availabilities = mentorAvailabilityController.getAvailabilityByMentorId(mentorId);
+        
+        // Nếu không có availability được định nghĩa, cho phép (backward compatibility)
+        if (availabilities.isEmpty()) {
+            return true;
+        }
+        
+        DayOfWeek dayOfWeek = time.getDayOfWeek();
+        LocalTime timeOfDay = time.toLocalTime();
+        LocalTime sessionEndTime = timeOfDay.plusHours(SESSION_DURATION_HOURS);
+        
+        // Kiểm tra xem có availability nào khớp với thời gian này không
+        return availabilities.stream()
+                .anyMatch(avail -> 
+                    matchesDayOfWeek(dayOfWeek, avail.getDayOfWeek()) &&
+                    timeOfDay.compareTo(avail.getStartTime()) >= 0 &&
+                    sessionEndTime.compareTo(avail.getEndTime()) <= 0
+                );
+    }
+
+    /**
+     * Sử dụng studentAvailabilityController để kiểm tra student có available tại thời điểm này không
+     */
+    private boolean isStudentAvailableAtTime(String studentId, LocalDateTime time) {
+        if (studentId == null || time == null) return false;
+        
+        List<StudentAvailability> availabilities = studentAvailabilityController.getAvailabilityByStudentId(studentId);
+        
+        // Nếu không có availability được định nghĩa, cho phép (backward compatibility)
+        if (availabilities.isEmpty()) {
+            return true;
+        }
+        
+        DayOfWeek dayOfWeek = time.getDayOfWeek();
+        LocalTime timeOfDay = time.toLocalTime();
+        LocalTime sessionEndTime = timeOfDay.plusHours(SESSION_DURATION_HOURS);
+        
+        // Kiểm tra xem có availability nào khớp với thời gian này không
+        return availabilities.stream()
+                .anyMatch(avail -> 
+                    matchesDayOfWeek(dayOfWeek, avail.getDayOfWeek()) &&
+                    timeOfDay.compareTo(avail.getStartTime()) >= 0 &&
+                    sessionEndTime.compareTo(avail.getEndTime()) <= 0
+                );
     }
 
     private List<LocalDateTime> generatePossibleTimeSlots(LocalDate startDate) {
