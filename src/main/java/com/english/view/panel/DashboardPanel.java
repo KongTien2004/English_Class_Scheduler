@@ -48,16 +48,6 @@ public class DashboardPanel extends JPanel {
 
         contentPanel.add(statsPanel);
 
-        // Quick actions panel
-        JPanel actionsPanel = new JPanel(new GridLayout(1, 3, 15, 0));
-        actionsPanel.setBackground(Color.WHITE);
-
-        actionsPanel.add(createActionCard("New Student", "Register a new student", "👨‍🎓"));
-        actionsPanel.add(createActionCard("Create Learning Plan", "Set up a new learning plan", "📋"));
-        actionsPanel.add(createActionCard("Schedule Session", "Schedule a learning session", "📅"));
-
-        contentPanel.add(actionsPanel);
-
         add(contentPanel, BorderLayout.CENTER);
     }
 
@@ -89,44 +79,44 @@ public class DashboardPanel extends JPanel {
         return card;
     }
 
-    private JPanel createActionCard(String title, String description, String icon) {
-        JPanel card = new JPanel();
-        card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
-        card.setBackground(Color.WHITE);
-        card.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(189, 195, 199), 2),
-                BorderFactory.createEmptyBorder(30, 20, 30, 20)
-        ));
-
-        JLabel iconLabel = new JLabel(icon);
-        iconLabel.setFont(new Font("Arial", Font.PLAIN, 48));
-        iconLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        JLabel titleLabel = new JLabel(title);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        JLabel descLabel = new JLabel(description);
-        descLabel.setFont(new Font("Arial", Font.PLAIN, 12));
-        descLabel.setForeground(Color.GRAY);
-        descLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        JButton actionButton = new JButton("Start");
-        actionButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        actionButton.setBackground(new Color(41, 128, 185));
-        actionButton.setForeground(Color.WHITE);
-        actionButton.setFocusPainted(false);
-        actionButton.setBorderPainted(false);
-        actionButton.setPreferredSize(new Dimension(100, 35));
-
-        card.add(iconLabel);
-        card.add(Box.createRigidArea(new Dimension(0, 15)));
-        card.add(titleLabel);
-        card.add(Box.createRigidArea(new Dimension(0, 10)));
-        card.add(descLabel);
-        card.add(Box.createRigidArea(new Dimension(0, 20)));
-        card.add(actionButton);
-
-        return card;
-    }
+//    private JPanel createActionCard(String title, String description, String icon) {
+//        JPanel card = new JPanel();
+//        card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
+//        card.setBackground(Color.WHITE);
+//        card.setBorder(BorderFactory.createCompoundBorder(
+//                BorderFactory.createLineBorder(new Color(189, 195, 199), 2),
+//                BorderFactory.createEmptyBorder(30, 20, 30, 20)
+//        ));
+//
+//        JLabel iconLabel = new JLabel(icon);
+//        iconLabel.setFont(new Font("Arial", Font.PLAIN, 48));
+//        iconLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+//
+//        JLabel titleLabel = new JLabel(title);
+//        titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
+//        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+//
+//        JLabel descLabel = new JLabel(description);
+//        descLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+//        descLabel.setForeground(Color.GRAY);
+//        descLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+//
+//        JButton actionButton = new JButton("Start");
+//        actionButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+//        actionButton.setBackground(new Color(41, 128, 185));
+//        actionButton.setForeground(Color.WHITE);
+//        actionButton.setFocusPainted(false);
+//        actionButton.setBorderPainted(false);
+//        actionButton.setPreferredSize(new Dimension(100, 35));
+//
+//        card.add(iconLabel);
+//        card.add(Box.createRigidArea(new Dimension(0, 15)));
+//        card.add(titleLabel);
+//        card.add(Box.createRigidArea(new Dimension(0, 10)));
+//        card.add(descLabel);
+//        card.add(Box.createRigidArea(new Dimension(0, 20)));
+//        card.add(actionButton);
+//
+//        return card;
+//    }
 }

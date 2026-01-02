@@ -60,7 +60,7 @@ public class StudentPanel extends JPanel {
     private JScrollPane createTablePanel() {
         String[] columns = {
                 "Student ID", "Name", "Phone", "Email", "IELTS Type",
-                "Target Band", "Listening", "Reading", "Writing", "Speaking", "Center ID"
+                "Target Band", "Listening", "Reading", "Writing", "Speaking", "Preferred Center", "Address"
         };
 
         tableModel = new DefaultTableModel(columns, 0) {
@@ -75,7 +75,7 @@ public class StudentPanel extends JPanel {
         studentTable.setFont(new Font("Arial", Font.PLAIN, 12));
         studentTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
         studentTable.getTableHeader().setBackground(new Color(52, 73, 94));
-        studentTable.getTableHeader().setForeground(Color.WHITE);
+        studentTable.getTableHeader().setForeground(Color.BLACK);
         studentTable.setSelectionBackground(new Color(41, 128, 185));
         studentTable.setSelectionForeground(Color.WHITE);
         studentTable.setGridColor(new Color(189, 195, 199));
@@ -236,8 +236,5 @@ public class StudentPanel extends JPanel {
     private void refreshTable() {
         // TODO: Load data from database
         tableModel.setRowCount(0);
-        // Sample data
-        tableModel.addRow(new Object[]{"STD001", "John Doe", "0123456789", "john@email.com",
-                "ACADEMIC", "7.0", "6.5", "7.0", "6.0", "7.5", "CTR001"});
     }
 }
