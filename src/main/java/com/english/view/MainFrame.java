@@ -72,7 +72,7 @@ public class MainFrame extends JFrame {
         contentPanel.add(packagePanel, "Packages");
         contentPanel.add(learningPlanPanel, "Learning Plans");
         contentPanel.add(learningSessionPanel, "Learning Sessions");
-        contentPanel.add(mentorAvailabilityPanel, "Mentor Avalabilities");
+        contentPanel.add(mentorAvailabilityPanel, "Mentor Availabilities");
         contentPanel.add(studentAvailabilityPanel, "Student Availabilities");
         contentPanel.add(studentPreferencePanel, "Student Preferences");
 
@@ -88,34 +88,39 @@ public class MainFrame extends JFrame {
 
         // File menu
         JMenu fileMenu = new JMenu("File");
-        fileMenu.setForeground(Color.WHITE);
+        fileMenu.setForeground(Color.BLACK);
         JMenuItem exitItem = new JMenuItem("Exit");
         exitItem.addActionListener(e -> System.exit(0));
         fileMenu.add(exitItem);
         menuBar.add(fileMenu);
 
         // Management menu
-        JMenu managementMenu = new JMenu("Management");
-        managementMenu.setForeground(Color.WHITE);
-
-        String[] menuItems = {"Students", "Mentors", "Centers", "Packages",
-                "Learning Plans", "Learning Sessions", "Progress Records", "Purchases"};
-        for (String item : menuItems) {
-            JMenuItem menuItem = new JMenuItem(item);
-            menuItem.addActionListener(e -> showPanel(item));
-            managementMenu.add(menuItem);
-        }
+        JMenu managementMenu = getJMenu();
         menuBar.add(managementMenu);
 
         // Help menu
         JMenu helpMenu = new JMenu("Help");
-        helpMenu.setForeground(Color.WHITE);
+        helpMenu.setForeground(Color.BLACK);
         JMenuItem aboutItem = new JMenuItem("About");
         aboutItem.addActionListener(e -> showAboutDialog());
         helpMenu.add(aboutItem);
         menuBar.add(helpMenu);
 
         return menuBar;
+    }
+
+    private JMenu getJMenu() {
+        JMenu managementMenu = new JMenu("Management");
+        managementMenu.setForeground(Color.BLACK);
+
+        String[] menuItems = {"Students", "Mentors", "Assistants", "Rooms", "Centers", "Packages",
+                "Learning Plans", "Learning Sessions", "Mentor Availabilities", "Student Availabilities", "Student Preferences"};
+        for (String item : menuItems) {
+            JMenuItem menuItem = new JMenuItem(item);
+            menuItem.addActionListener(e -> showPanel(item));
+            managementMenu.add(menuItem);
+        }
+        return managementMenu;
     }
 
     private JPanel createSideMenu() {
@@ -136,14 +141,9 @@ public class MainFrame extends JFrame {
 
         // Menu buttons
         String[] menuItems = {
-                "Dashboard", "Students", "Mentors", "Centers", "Packages",
-                "Learning Plans", "Learning Sessions", "Progress Records", "Purchases"
+                "Dashboard", "Students", "Mentors", "Assistants", "Rooms", "Centers", "Packages",
+                "Learning Plans", "Learning Sessions", "Mentor Availabilities", "Student Availabilities", "Student Preferences"
         };
-
-//        String[] icons = {
-//                "📊", "👨‍🎓", "👨‍🏫", "🏢", "📦",
-//                "📋", "📅", "📈", "💰"
-//        };
 
         for (int i = 0; i < menuItems.length; i++) {
             JButton menuButton = createMenuButton(menuItems[i], menuItems[i]);
