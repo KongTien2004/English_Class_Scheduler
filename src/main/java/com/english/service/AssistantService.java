@@ -8,6 +8,10 @@ import java.util.List;
 public class AssistantService {
     private AssistantDAO assistantDAO;
 
+    public AssistantService(AssistantDAO assistantDAO) {
+        this.assistantDAO = assistantDAO;
+    }
+
     public AssistantDAO getAssistantDAO() {
         return assistantDAO;
     }
