@@ -30,4 +30,12 @@ public class StudentAvailabilityService {
         }
         return studentAvailabilityDAO.getAvailabilityByStudentId(studentId);
     }
+
+    public List<StudentAvailability> getAllStudentAvailabilities() {
+        return studentAvailabilityDAO.getAllStudentAvailabilities();
+    }
+
+    public int totalStudentAvailabilities() {
+        return studentAvailabilityDAO.getAllStudentAvailabilities().size();
+    }
 }

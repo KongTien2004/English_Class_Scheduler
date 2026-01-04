@@ -35,4 +35,8 @@ public class StudentPreferenceService {
     public List<StudentPreference> getPreferenceByStudent(String studentId) {
         return studentPreferenceDAO.getPreferenceByStudent(studentId);
     }
+
+    public int totalPreferences() {
+        return studentPreferenceDAO.getAllPreferences().size();
+    }
 }

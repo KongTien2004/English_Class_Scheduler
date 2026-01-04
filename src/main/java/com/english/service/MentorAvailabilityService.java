@@ -34,4 +34,12 @@ public class MentorAvailabilityService {
         }
         return mentorAvailabilityDAO.getAvailabilityByMentorId(mentorId);
     }
+
+    public List<MentorAvailability> getAllMentorAvailabilities() {
+        return mentorAvailabilityDAO.getAllMentorAvailabilities();
+    }
+
+    public int totalMentorAvailability() {
+        return mentorAvailabilityDAO.getAllMentorAvailabilities().size();
+    }
 }
