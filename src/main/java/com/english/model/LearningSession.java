@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 public class LearningSession implements Serializable {
-    public enum SessionType {ONLINE, OFFLINE}
-    public enum SessionStatus {SCHEDULED, COMPLETED, CANCELLED, NO_SHOW}
+    public enum SessionType {Online, Offline}
+    public enum SessionStatus {scheduled, completed, cancelled, no_show}
 
     private String sessionId;
     private String planId;

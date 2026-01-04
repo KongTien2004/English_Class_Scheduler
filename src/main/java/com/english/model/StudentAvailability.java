@@ -5,13 +5,13 @@ import java.time.LocalTime;
 
 public class StudentAvailability implements Serializable {
     public enum DayOfWeeks {
-        MONDAY,
-        TUESDAY,
-        WEDNESDAY,
-        THURSDAY,
-        FRIDAY,
-        SATURDAY,
-        SUNDAY
+        Monday,
+        Tuesday,
+        Wednesday,
+        Thursday,
+        Friday,
+        Saturday,
+        Sunday
     }
 
     private String availabilityId;

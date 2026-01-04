@@ -145,7 +145,7 @@ public class Scheduler {
      */
     public Room findOptimalRoom(String centerId, LocalDateTime scheduledTime,
                                 LearningSession.SessionType sessionType, String planId) {
-        if (sessionType == LearningSession.SessionType.ONLINE) {
+        if (sessionType == LearningSession.SessionType.Online) {
             return null;
         }
 
@@ -468,7 +468,7 @@ public class Scheduler {
 
         return learningSessionController.getAllLearningSessions().stream()
                 .filter(s -> s.getLocation() != null && s.getLocation().contains(room.getRoomId()))
-                .filter(s -> s.getSessionStatus() == LearningSession.SessionStatus.SCHEDULED)
+                .filter(s -> s.getSessionStatus() == LearningSession.SessionStatus.scheduled)
                 .noneMatch(s -> {
                     LocalDateTime sessionEnd = s.getScheduledTime().plusHours(SESSION_DURATION_HOURS);
                     return time.isBefore(sessionEnd) && s.getScheduledTime().isBefore(endTime);
@@ -480,7 +480,7 @@ public class Scheduler {
 
         return learningSessionController.getAllLearningSessions().stream()
                 .filter(s -> s.getLocation() != null && s.getLocation().contains(roomId))
-                .filter(s -> s.getSessionStatus() == LearningSession.SessionStatus.SCHEDULED)
+                .filter(s -> s.getSessionStatus() == LearningSession.SessionStatus.scheduled)
                 .anyMatch(s -> {
                     LocalDateTime sessionEnd = s.getScheduledTime().plusHours(SESSION_DURATION_HOURS);
                     return time.isBefore(sessionEnd) && s.getScheduledTime().isBefore(endTime);
@@ -498,7 +498,7 @@ public class Scheduler {
                     LearningPlan plan = learningPlanController.getLearningPlanById(s.getPlanId());
                     return plan != null && plan.getMentorId().equals(mentorId);
                 })
-                .filter(s -> s.getSessionStatus() == LearningSession.SessionStatus.SCHEDULED)
+                .filter(s -> s.getSessionStatus() == LearningSession.SessionStatus.scheduled)
                 .filter(s -> {
                     LocalDateTime sessionEnd = s.getScheduledTime().plusHours(SESSION_DURATION_HOURS);
                     boolean hasConflict = time.isBefore(sessionEnd) && s.getScheduledTime().isBefore(endTime);
@@ -546,7 +546,7 @@ public class Scheduler {
         session.setStartTime(proposal.scheduledTime);
         session.setEndTime(endTime);
         session.setLocation(proposal.centerId);
-        session.setSessionStatus(LearningSession.SessionStatus.SCHEDULED);
+        session.setSessionStatus(LearningSession.SessionStatus.scheduled);
 
         return session;
     }
@@ -606,7 +606,7 @@ public class Scheduler {
         
         ScheduleProposal currentProposal = new ScheduleProposal(
                 currentTime,
-                LearningSession.SessionType.OFFLINE,
+                LearningSession.SessionType.Offline,
                 bestCenterId != null ? bestCenterId : preferredCenterId,
                 currentScore
         );
@@ -632,7 +632,7 @@ public class Scheduler {
                 currentScore = bestScore;
                 currentProposal = new ScheduleProposal(
                         currentTime,
-                        LearningSession.SessionType.OFFLINE,
+                        LearningSession.SessionType.Offline,
                         bestCenterId != null ? bestCenterId : preferredCenterId,
                         currentScore
                 );
@@ -930,7 +930,7 @@ public class Scheduler {
                     LearningPlan plan = learningPlanController.getLearningPlanById(s.getPlanId());
                     return plan != null && plan.getMentorId().equals(mentorId);
                 })
-                .filter(s -> s.getSessionStatus() == LearningSession.SessionStatus.SCHEDULED)
+                .filter(s -> s.getSessionStatus() == LearningSession.SessionStatus.scheduled)
                 .filter(s -> s.getScheduledTime().toLocalDate().equals(date))
                 .count();
     }
@@ -950,13 +950,13 @@ public class Scheduler {
      */
     private boolean matchesDayOfWeek(DayOfWeek javaDayOfWeek, StudentPreference.DayOfWeeks preferenceDay) {
         switch (javaDayOfWeek) {
-            case MONDAY: return preferenceDay == StudentPreference.DayOfWeeks.MONDAY;
-            case TUESDAY: return preferenceDay == StudentPreference.DayOfWeeks.TUESDAY;
-            case WEDNESDAY: return preferenceDay == StudentPreference.DayOfWeeks.WEDNESDAY;
-            case THURSDAY: return preferenceDay == StudentPreference.DayOfWeeks.THURSDAY;
-            case FRIDAY: return preferenceDay == StudentPreference.DayOfWeeks.FRIDAY;
-            case SATURDAY: return preferenceDay == StudentPreference.DayOfWeeks.SATURDAY;
-            case SUNDAY: return preferenceDay == StudentPreference.DayOfWeeks.SUNDAY;
+            case MONDAY: return preferenceDay == StudentPreference.DayOfWeeks.Monday;
+            case TUESDAY: return preferenceDay == StudentPreference.DayOfWeeks.Tuesday;
+            case WEDNESDAY: return preferenceDay == StudentPreference.DayOfWeeks.Wednesday;
+            case THURSDAY: return preferenceDay == StudentPreference.DayOfWeeks.Thursday;
+            case FRIDAY: return preferenceDay == StudentPreference.DayOfWeeks.Friday;
+            case SATURDAY: return preferenceDay == StudentPreference.DayOfWeeks.Saturday;
+            case SUNDAY: return preferenceDay == StudentPreference.DayOfWeeks.Sunday;
             default: return false;
         }
     }
@@ -966,13 +966,13 @@ public class Scheduler {
      */
     private boolean matchesDayOfWeek(DayOfWeek javaDayOfWeek, MentorAvailability.DayOfWeeks availabilityDay) {
         switch (javaDayOfWeek) {
-            case MONDAY: return availabilityDay == MentorAvailability.DayOfWeeks.MONDAY;
-            case TUESDAY: return availabilityDay == MentorAvailability.DayOfWeeks.TUESDAY;
-            case WEDNESDAY: return availabilityDay == MentorAvailability.DayOfWeeks.WEDNESDAY;
-            case THURSDAY: return availabilityDay == MentorAvailability.DayOfWeeks.THURSDAY;
-            case FRIDAY: return availabilityDay == MentorAvailability.DayOfWeeks.FRIDAY;
-            case SATURDAY: return availabilityDay == MentorAvailability.DayOfWeeks.SATURDAY;
-            case SUNDAY: return availabilityDay == MentorAvailability.DayOfWeeks.SUNDAY;
+            case MONDAY: return availabilityDay == MentorAvailability.DayOfWeeks.Monday;
+            case TUESDAY: return availabilityDay == MentorAvailability.DayOfWeeks.Tuesday;
+            case WEDNESDAY: return availabilityDay == MentorAvailability.DayOfWeeks.Wednesday;
+            case THURSDAY: return availabilityDay == MentorAvailability.DayOfWeeks.Thursday;
+            case FRIDAY: return availabilityDay == MentorAvailability.DayOfWeeks.Friday;
+            case SATURDAY: return availabilityDay == MentorAvailability.DayOfWeeks.Saturday;
+            case SUNDAY: return availabilityDay == MentorAvailability.DayOfWeeks.Sunday;
             default: return false;
         }
     }
@@ -982,13 +982,13 @@ public class Scheduler {
      */
     private boolean matchesDayOfWeek(DayOfWeek javaDayOfWeek, StudentAvailability.DayOfWeeks availabilityDay) {
         switch (javaDayOfWeek) {
-            case MONDAY: return availabilityDay == StudentAvailability.DayOfWeeks.MONDAY;
-            case TUESDAY: return availabilityDay == StudentAvailability.DayOfWeeks.TUESDAY;
-            case WEDNESDAY: return availabilityDay == StudentAvailability.DayOfWeeks.WEDNESDAY;
-            case THURSDAY: return availabilityDay == StudentAvailability.DayOfWeeks.THURSDAY;
-            case FRIDAY: return availabilityDay == StudentAvailability.DayOfWeeks.FRIDAY;
-            case SATURDAY: return availabilityDay == StudentAvailability.DayOfWeeks.SATURDAY;
-            case SUNDAY: return availabilityDay == StudentAvailability.DayOfWeeks.SUNDAY;
+            case MONDAY: return availabilityDay == StudentAvailability.DayOfWeeks.Monday;
+            case TUESDAY: return availabilityDay == StudentAvailability.DayOfWeeks.Tuesday;
+            case WEDNESDAY: return availabilityDay == StudentAvailability.DayOfWeeks.Wednesday;
+            case THURSDAY: return availabilityDay == StudentAvailability.DayOfWeeks.Thursday;
+            case FRIDAY: return availabilityDay == StudentAvailability.DayOfWeeks.Friday;
+            case SATURDAY: return availabilityDay == StudentAvailability.DayOfWeeks.Saturday;
+            case SUNDAY: return availabilityDay == StudentAvailability.DayOfWeeks.Sunday;
             default: return false;
         }
     }
