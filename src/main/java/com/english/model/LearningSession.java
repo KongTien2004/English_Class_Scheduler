@@ -12,23 +12,23 @@ public class LearningSession implements Serializable {
     private int sessionNumber;
     private SessionType sessionType;
     private LocalDateTime scheduledTime;
-    private LocalDateTime actualStart;
-    private LocalDateTime actualEnd;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
     private String location;
     private SessionStatus sessionStatus;
 
     public LearningSession() {}
 
     public LearningSession(String sessionId, String planId, int sessionNumber, SessionType sessionType,
-                           LocalDateTime scheduledTime, LocalDateTime actualStart, LocalDateTime actualEnd,
+                           LocalDateTime scheduledTime, LocalDateTime startTime, LocalDateTime endTime,
                            String location, SessionStatus sessionStatus) {
         this.sessionId = sessionId;
         this.planId = planId;
         this.sessionNumber = sessionNumber;
         this.sessionType = sessionType;
         this.scheduledTime = scheduledTime;
-        this.actualStart = actualStart;
-        this.actualEnd = actualEnd;
+        this.startTime = startTime;
+        this.endTime = endTime;
         this.location = location;
         this.sessionStatus = sessionStatus;
     }
@@ -54,12 +54,12 @@ public class LearningSession implements Serializable {
         return scheduledTime;
     }
 
-    public LocalDateTime getActualStart() {
-        return actualStart;
+    public LocalDateTime getStartTime() {
+        return startTime;
     }
 
-    public LocalDateTime getActualEnd() {
-        return actualEnd;
+    public LocalDateTime getEndTime() {
+        return endTime;
     }
 
     public String getLocation() {
@@ -91,12 +91,12 @@ public class LearningSession implements Serializable {
         this.scheduledTime = scheduledTime;
     }
 
-    public void setActualStart(LocalDateTime actualStart) {
-        this.actualStart = actualStart;
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
     }
 
-    public void setActualEnd(LocalDateTime actualEnd) {
-        this.actualEnd = actualEnd;
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
     }
 
     public void setLocation(String location) {
