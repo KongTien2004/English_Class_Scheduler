@@ -543,8 +543,8 @@ public class Scheduler {
         session.setSessionNumber(sessionNumber);
         session.setSessionType(proposal.sessionType);
         session.setScheduledTime(proposal.scheduledTime);
-        session.setActualStart(proposal.scheduledTime);
-        session.setActualEnd(endTime);
+        session.setStartTime(proposal.scheduledTime);
+        session.setEndTime(endTime);
         session.setLocation(proposal.centerId);
         session.setSessionStatus(LearningSession.SessionStatus.SCHEDULED);
 
