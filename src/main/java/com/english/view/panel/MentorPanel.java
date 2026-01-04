@@ -1,19 +1,29 @@
 package com.english.view.panel;
 
+import com.english.DAO.MentorDAO;
+import com.english.model.Mentor;
+import com.english.service.MentorService;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.List;
 
 public class MentorPanel extends JPanel {
     private JTable mentorTable;
     private DefaultTableModel tableModel;
     private JTextField searchField;
     private JButton addButton, editButton, deleteButton, refreshButton;
+    private MentorService mentorService;
 
     public MentorPanel() {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
+        // Initialize service
+        mentorService = new MentorService(new MentorDAO());
         initComponents();
+        // Load data when panel is created
+        refreshTable();
     }
 
     private void initComponents() {
@@ -228,7 +238,28 @@ public class MentorPanel extends JPanel {
     }
 
     private void refreshTable() {
-        // TODO: Load data from database
         tableModel.setRowCount(0);
+        try {
+            List<Mentor> mentors = mentorService.getAllMentors();
+            for (Mentor mentor : mentors) {
+                Object[] row = {
+                    mentor.getMentorId(),
+                    mentor.getMentorName(),
+                    mentor.getEmail() != null ? mentor.getEmail() : "",
+                    mentor.getCertifiedBand(),
+                    mentor.isCanTeachGeneral(),
+                    mentor.isCanTeachAcademic(),
+                    mentor.isAvailable(),
+                    mentor.getMentorAddress() != null ? mentor.getMentorAddress() : ""
+                };
+                tableModel.addRow(row);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, 
+                "Error loading mentors: " + e.getMessage(), 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
     }
 }

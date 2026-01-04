@@ -1,19 +1,29 @@
 package com.english.view.panel;
 
+import com.english.DAO.AssistantDAO;
+import com.english.model.Assistant;
+import com.english.service.AssistantService;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.List;
 
 public class AssistantPanel extends JPanel {
     private JTable assistantTable;
     private DefaultTableModel tableModel;
     private JTextField searchField;
     private JButton addButton, editButton, deleteButton, refreshButton;
+    private AssistantService assistantService;
 
     public AssistantPanel() {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
+        // Initialize service
+        assistantService = new AssistantService(new AssistantDAO());
         initComponents();
+        // Load data when panel is created
+        refreshTable();
     }
 
     private void initComponents() {
@@ -237,7 +247,32 @@ public class AssistantPanel extends JPanel {
     }
 
     private void refreshTable() {
-        // TODO: Load data from database
         tableModel.setRowCount(0);
+        try {
+            List<Assistant> assistants = assistantService.getAllAssistants();
+            for (Assistant assistant : assistants) {
+                Object[] row = {
+                        assistant.getAssistantId(),
+                        assistant.getAssistantName(),
+                        assistant.getEmail() != null ? assistant.getEmail() : "",
+                        assistant.getCertifiedBand(),
+                        assistant.isStrongListening(),
+                        assistant.isStrongReading(),
+                        assistant.isStrongWriting(),
+                        assistant.isStrongSpeaking(),
+                        assistant.isCanSupportGeneral(),
+                        assistant.isCanSupportAcademic(),
+                        assistant.isAvailable(),
+                        assistant.getAssistantAddress() != null ? assistant.getAssistantAddress() : "",
+                };
+                tableModel.addRow(row);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Error loading assistants: " + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
     }
 }

@@ -1,19 +1,29 @@
 package com.english.view.panel;
 
+import com.english.DAO.PackageDAO;
+import com.english.model.Package;
+import com.english.service.PackageService;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.List;
 
 public class PackagePanel extends JPanel {
     private JTable packageTable;
     private DefaultTableModel tableModel;
     private JTextField searchField;
     private JButton addButton, editButton, deleteButton, refreshButton;
+    private PackageService packageService;
 
     public PackagePanel() {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
+        // Initialize service
+        packageService = new PackageService(new PackageDAO());
         initComponents();
+        // Load data when panel is created
+        refreshTable();
     }
 
     private void initComponents() {
@@ -226,7 +236,27 @@ public class PackagePanel extends JPanel {
     }
 
     private void refreshTable() {
-        // TODO: Load data from database
         tableModel.setRowCount(0);
+        try {
+            List<Package> packages = packageService.getAllPackages();
+            for (Package pkg : packages) {
+                Object[] row = {
+                    pkg.getPackageId(),
+                    pkg.getPackageName(),
+                    pkg.getIeltsType().name(),
+                    pkg.getTargetBand(),
+                    pkg.getTotalSessions(),
+                    pkg.getPrice(),
+                    pkg.isActive() ? "Yes" : "No"
+                };
+                tableModel.addRow(row);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, 
+                "Error loading packages: " + e.getMessage(), 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
     }
 }

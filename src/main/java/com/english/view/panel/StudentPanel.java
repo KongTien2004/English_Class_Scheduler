@@ -1,19 +1,29 @@
 package com.english.view.panel;
 
+import com.english.DAO.StudentDAO;
+import com.english.model.Student;
+import com.english.service.StudentService;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.List;
 
 public class StudentPanel extends JPanel {
     private JTable studentTable;
     private DefaultTableModel tableModel;
     private JTextField searchField;
     private JButton addButton, editButton, deleteButton, refreshButton;
+    private StudentService studentService;
 
     public StudentPanel() {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
+        // Initialize service
+        studentService = new StudentService(new StudentDAO());
         initComponents();
+        // Load data when panel is created
+        refreshTable();
     }
 
     private void initComponents() {
@@ -234,7 +244,32 @@ public class StudentPanel extends JPanel {
     }
 
     private void refreshTable() {
-        // TODO: Load data from database
         tableModel.setRowCount(0);
+        try {
+            List<Student> students = studentService.getAllStudents();
+            for (Student student : students) {
+                Object[] row = {
+                    student.getStudentId(),
+                    student.getStudentName(),
+                    student.getPhone() != null ? student.getPhone() : "",
+                    student.getEmail() != null ? student.getEmail() : "",
+                    student.getIeltsType().name(),
+                    student.getTargetBand(),
+                    student.getCurrentListeningBand(),
+                    student.getCurrentReadingBand(),
+                    student.getCurrentWritingBand(),
+                    student.getCurrentSpeakingBand(),
+                    student.getPreferredCenterId() != null ? student.getPreferredCenterId() : "",
+                    student.getStudentAddress() != null ? student.getStudentAddress() : ""
+                };
+                tableModel.addRow(row);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, 
+                "Error loading students: " + e.getMessage(), 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
     }
 }

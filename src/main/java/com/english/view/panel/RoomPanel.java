@@ -1,19 +1,29 @@
 package com.english.view.panel;
 
+import com.english.DAO.RoomDAO;
+import com.english.model.Room;
+import com.english.service.RoomService;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.List;
 
 public class RoomPanel extends JPanel {
     private JTable roomTable;
     private DefaultTableModel tableModel;
     private JTextField searchField;
     private JButton addButton, editButton, deleteButton, refreshButton;
+    private RoomService roomService;
 
     public RoomPanel() {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
+        // Initialize service
+        roomService = new RoomService(new RoomDAO());
         initComponents();
+        // Load data when panel is created
+        refreshTable();
     }
 
     private void initComponents() {
@@ -221,7 +231,25 @@ public class RoomPanel extends JPanel {
     }
 
     private void refreshTable() {
-        // TODO: Load data from database
         tableModel.setRowCount(0);
+        try {
+            List<Room> rooms = roomService.getAllRooms();
+            for (Room room : rooms) {
+                Object[] row = {
+                    room.getRoomId(),
+                    room.getRoomName(),
+                    room.getCenterId(),
+                    room.getCapacity(),
+                    room.isAvailable() ? "Yes" : "No"
+                };
+                tableModel.addRow(row);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, 
+                "Error loading rooms: " + e.getMessage(), 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
     }
 }

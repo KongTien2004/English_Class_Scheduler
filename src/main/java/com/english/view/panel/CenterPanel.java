@@ -1,19 +1,29 @@
 package com.english.view.panel;
 
+import com.english.DAO.CenterDAO;
+import com.english.model.Center;
+import com.english.service.CenterService;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.List;
 
 public class CenterPanel extends JPanel {
     private JTable centerTable;
     private DefaultTableModel tableModel;
     private JTextField searchField;
     private JButton addButton, editButton, deleteButton, refreshButton;
+    private CenterService centerService;
 
     public CenterPanel() {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
+        // Initialize service
+        centerService = new CenterService(new CenterDAO());
         initComponents();
+        // Load data when panel is created
+        refreshTable();
     }
 
     private void initComponents() {
@@ -212,7 +222,24 @@ public class CenterPanel extends JPanel {
     }
 
     private void refreshTable() {
-        // TODO: Load data from database
         tableModel.setRowCount(0);
+        try {
+            List<Center> centers = centerService.getAllCenters();
+            for (Center center : centers) {
+                Object[] row = {
+                    center.getCenterId(),
+                    center.getCenterName(),
+                    center.getAddress() != null ? center.getAddress() : "",
+                    center.getCity() != null ? center.getCity() : ""
+                };
+                tableModel.addRow(row);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, 
+                "Error loading centers: " + e.getMessage(), 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
     }
 }

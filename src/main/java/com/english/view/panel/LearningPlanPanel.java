@@ -1,19 +1,29 @@
 package com.english.view.panel;
 
+import com.english.DAO.LearningPlanDAO;
+import com.english.model.LearningPlan;
+import com.english.service.LearningPlanService;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.List;
 
 public class LearningPlanPanel extends JPanel {
     private JTable planTable;
     private DefaultTableModel tableModel;
     private JTextField searchField;
     private JButton addButton, editButton, deleteButton, refreshButton;
+    private LearningPlanService learningPlanService;
 
     public LearningPlanPanel() {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
+        // Initialize service
+        learningPlanService = new LearningPlanService(new LearningPlanDAO());
         initComponents();
+        // Load data when panel is created
+        refreshTable();
     }
 
     private void initComponents() {
@@ -230,7 +240,29 @@ public class LearningPlanPanel extends JPanel {
     }
 
     private void refreshTable() {
-        // TODO: Load data from database
         tableModel.setRowCount(0);
+        try {
+            List<LearningPlan> plans = learningPlanService.getAllLearningPlans();
+            for (LearningPlan plan : plans) {
+                Object[] row = {
+                    plan.getPlanId(),
+                    plan.getStudentId(),
+                    plan.getMentorId(),
+                    plan.getIeltsType().name(),
+                    plan.getTargetBand(),
+                    plan.getTotalSessions(),
+                    plan.getRemainingSessions(),
+                    plan.getStartDate() != null ? plan.getStartDate().toString() : "",
+                    plan.getPlanStatus() != null ? plan.getPlanStatus().name() : ""
+                };
+                tableModel.addRow(row);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, 
+                "Error loading learning plans: " + e.getMessage(), 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
     }
 }
