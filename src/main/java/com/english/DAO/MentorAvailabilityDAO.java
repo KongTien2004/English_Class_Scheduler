@@ -87,4 +87,27 @@ public class MentorAvailabilityDAO {
 
         return availabilities;
     }
+
+    public List<MentorAvailability> getAllMentorAvailabilities() {
+        String query = "SELECT * FROM mentor_availability";
+        List<MentorAvailability> availabilities = new ArrayList<>();
+
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query);
+             ResultSet rs = statement.executeQuery()) {
+            while (rs.next()) {
+                availabilities.add(new MentorAvailability(
+                        rs.getString("availability_id"),
+                        rs.getString("mentor_id"),
+                        MentorAvailability.DayOfWeeks.valueOf(rs.getString("day_of_week")),
+                        rs.getTime("start_time").toLocalTime(),
+                        rs.getTime("end_time").toLocalTime()
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return availabilities;
+    }
 }

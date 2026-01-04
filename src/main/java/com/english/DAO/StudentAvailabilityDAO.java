@@ -86,4 +86,27 @@ public class StudentAvailabilityDAO {
 
         return availabilities;
     }
+
+    public List<StudentAvailability> getAllStudentAvailabilities() {
+        String query = "SELECT * FROM student_availability";
+        List<StudentAvailability> availabilities = new ArrayList<>();
+
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query);
+             ResultSet rs = statement.executeQuery()) {
+            while (rs.next()) {
+                availabilities.add(new StudentAvailability(
+                        rs.getString("availability_id"),
+                        rs.getString("student_id"),
+                        StudentAvailability.DayOfWeeks.valueOf(rs.getString("day_of_week")),
+                        rs.getTime("start_time").toLocalTime(),
+                        rs.getTime("end_time").toLocalTime()
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return availabilities;
+    }
 }

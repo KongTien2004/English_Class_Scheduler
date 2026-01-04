@@ -21,8 +21,8 @@ public class LearningSessionDAO {
             statement.setInt(3, learningSession.getSessionNumber());
             statement.setString(4, learningSession.getSessionType().name());
             statement.setTimestamp(5, java.sql.Timestamp.valueOf(learningSession.getScheduledTime()));
-            statement.setTimestamp(6, java.sql.Timestamp.valueOf(learningSession.getActualStart()));
-            statement.setTimestamp(7, java.sql.Timestamp.valueOf(learningSession.getActualEnd()));
+            statement.setTimestamp(6, java.sql.Timestamp.valueOf(learningSession.getStartTime()));
+            statement.setTimestamp(7, java.sql.Timestamp.valueOf(learningSession.getEndTime()));
             statement.setString(8, learningSession.getLocation());
             statement.setString(9, learningSession.getSessionStatus().name());
 
@@ -42,8 +42,8 @@ public class LearningSessionDAO {
             statement.setInt(2, learningSession.getSessionNumber());
             statement.setString(3, learningSession.getSessionType().name());
             statement.setTimestamp(4, java.sql.Timestamp.valueOf(learningSession.getScheduledTime()));
-            statement.setTimestamp(5, java.sql.Timestamp.valueOf(learningSession.getActualStart()));
-            statement.setTimestamp(6, java.sql.Timestamp.valueOf(learningSession.getActualEnd()));
+            statement.setTimestamp(5, java.sql.Timestamp.valueOf(learningSession.getStartTime()));
+            statement.setTimestamp(6, java.sql.Timestamp.valueOf(learningSession.getEndTime()));
             statement.setString(7, learningSession.getLocation());
             statement.setString(8, learningSession.getSessionStatus().name());
             statement.setString(9, learningSession.getSessionId());
@@ -110,8 +110,8 @@ public class LearningSessionDAO {
         learningSession.setSessionNumber(rs.getInt("session_number"));
         learningSession.setSessionType(LearningSession.SessionType.valueOf(rs.getString("session_type")));
         learningSession.setScheduledTime(rs.getTimestamp("scheduled_time").toLocalDateTime());
-        learningSession.setActualStart(rs.getTimestamp("actual_start").toLocalDateTime());
-        learningSession.setActualEnd(rs.getTimestamp("actual_end").toLocalDateTime());
+        learningSession.setStartTime(rs.getTimestamp("actual_start").toLocalDateTime());
+        learningSession.setEndTime(rs.getTimestamp("actual_end").toLocalDateTime());
         learningSession.setLocation(rs.getString("location"));
         learningSession.setSessionStatus(LearningSession.SessionStatus.valueOf(rs.getString("session_status")));
 
