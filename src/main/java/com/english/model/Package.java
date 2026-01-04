@@ -3,7 +3,7 @@ package com.english.model;
 import java.io.Serializable;
 
 public class Package implements Serializable {
-    public enum IELTSType {GENERAL, ACADEMIC}
+    public enum IELTSType {General, Academic}
 
     private String packageId;
     private String packageName;

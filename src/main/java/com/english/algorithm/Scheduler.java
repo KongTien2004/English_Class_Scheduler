@@ -129,9 +129,9 @@ public class Scheduler {
      * Kiểm tra mentor có đủ chuyên môn dạy không
      */
     private boolean isMentorQualified(Mentor mentor, Student student) {
-        if (student.getIeltsType() == Student.IELTSType.GENERAL) {
+        if (student.getIeltsType() == Student.IELTSType.General) {
             return mentor.isCanTeachGeneral();
-        } else if (student.getIeltsType() == Student.IELTSType.ACADEMIC) {
+        } else if (student.getIeltsType() == Student.IELTSType.Academic) {
             return mentor.isCanTeachAcademic();
         }
         return false;
@@ -447,9 +447,9 @@ public class Scheduler {
         long suitableAssistants = allAssistants.stream()
                 .filter(Assistant::isAvailable)
                 .filter(a -> {
-                    if (student.getIeltsType() == Student.IELTSType.GENERAL) {
+                    if (student.getIeltsType() == Student.IELTSType.General) {
                         return a.isCanSupportGeneral();
-                    } else if (student.getIeltsType() == Student.IELTSType.ACADEMIC) {
+                    } else if (student.getIeltsType() == Student.IELTSType.Academic) {
                         return a.isCanSupportAcademic();
                     }
                     return false;

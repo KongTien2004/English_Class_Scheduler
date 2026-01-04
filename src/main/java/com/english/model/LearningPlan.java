@@ -5,8 +5,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class LearningPlan implements Serializable {
-    public enum IELTSType {GENERAL, ACADEMIC}
-    public enum PlanStatus {ACTIVE, PAUSED, COMPLETED, CANCELLED}
+    public enum IELTSType {General, Academic}
+    public enum PlanStatus {active, paused, completed, cancelled}
 
     private String planId;
     private String studentId;

@@ -94,7 +94,7 @@ public class LearningPlanSearchStrategy implements SearchableEntity<LearningPlan
             stream = stream.filter(p -> p.getPlanStatus() == planStatus);
         } else {
             // Default to filtering for ACTIVE plans if no status is specified
-            stream = stream.filter(p -> p.getPlanStatus() == LearningPlan.PlanStatus.ACTIVE);
+            stream = stream.filter(p -> p.getPlanStatus() == LearningPlan.PlanStatus.active);
         }
 
         // Filter by target band range
