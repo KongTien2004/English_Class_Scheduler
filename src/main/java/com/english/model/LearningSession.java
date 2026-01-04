@@ -2,6 +2,7 @@ package com.english.model;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 public class LearningSession implements Serializable {
     public enum SessionType {Online, Offline}
@@ -12,15 +13,15 @@ public class LearningSession implements Serializable {
     private int sessionNumber;
     private SessionType sessionType;
     private LocalDateTime scheduledTime;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    private LocalTime startTime;
+    private LocalTime endTime;
     private String location;
     private SessionStatus sessionStatus;
 
     public LearningSession() {}
 
     public LearningSession(String sessionId, String planId, int sessionNumber, SessionType sessionType,
-                           LocalDateTime scheduledTime, LocalDateTime startTime, LocalDateTime endTime,
+                           LocalDateTime scheduledTime, LocalTime startTime, LocalTime endTime,
                            String location, SessionStatus sessionStatus) {
         this.sessionId = sessionId;
         this.planId = planId;
@@ -54,11 +55,11 @@ public class LearningSession implements Serializable {
         return scheduledTime;
     }
 
-    public LocalDateTime getStartTime() {
+    public LocalTime getStartTime() {
         return startTime;
     }
 
-    public LocalDateTime getEndTime() {
+    public LocalTime getEndTime() {
         return endTime;
     }
 
@@ -91,11 +92,11 @@ public class LearningSession implements Serializable {
         this.scheduledTime = scheduledTime;
     }
 
-    public void setStartTime(LocalDateTime startTime) {
+    public void setStartTime(LocalTime startTime) {
         this.startTime = startTime;
     }
 
-    public void setEndTime(LocalDateTime endTime) {
+    public void setEndTime(LocalTime endTime) {
         this.endTime = endTime;
     }
 
