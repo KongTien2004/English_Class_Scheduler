@@ -1,5 +1,6 @@
 package com.english.view.panel;
 
+import com.english.DAO.StudentPreferenceDAO;
 import com.english.model.StudentPreference;
 import com.english.service.StudentPreferenceService;
 
@@ -18,7 +19,9 @@ public class StudentPreferencePanel extends JPanel {
     public StudentPreferencePanel() {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
+        studentPreferenceService = new StudentPreferenceService(new StudentPreferenceDAO());
         initComponents();
+        refreshTable();
     }
 
     private void initComponents() {

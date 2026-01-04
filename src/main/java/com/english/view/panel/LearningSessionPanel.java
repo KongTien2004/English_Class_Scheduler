@@ -1,5 +1,6 @@
 package com.english.view.panel;
 
+import com.english.DAO.LearningSessionDAO;
 import com.english.model.LearningSession;
 import com.english.service.LearningSessionService;
 
@@ -18,7 +19,9 @@ public class LearningSessionPanel extends JPanel {
     public LearningSessionPanel() {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
+        learningSessionService = new LearningSessionService(new LearningSessionDAO());
         initComponents();
+        refreshTable();
     }
 
     private void initComponents() {

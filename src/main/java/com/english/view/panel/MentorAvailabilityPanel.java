@@ -1,5 +1,6 @@
 package com.english.view.panel;
 
+import com.english.DAO.MentorAvailabilityDAO;
 import com.english.model.MentorAvailability;
 import com.english.service.MentorAvailabilityService;
 
@@ -18,7 +19,9 @@ public class MentorAvailabilityPanel extends JPanel {
     public MentorAvailabilityPanel() {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
+        mentorAvailabilityService = new MentorAvailabilityService(new MentorAvailabilityDAO());
         initComponents();
+        refreshTable();
     }
 
     private void initComponents() {

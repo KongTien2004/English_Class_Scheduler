@@ -1,5 +1,6 @@
 package com.english.view.panel;
 
+import com.english.DAO.StudentAvailabilityDAO;
 import com.english.model.StudentAvailability;
 import com.english.service.StudentAvailabilityService;
 
@@ -18,7 +19,9 @@ public class StudentAvailabilityPanel extends JPanel {
     public StudentAvailabilityPanel() {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
+        studentAvailabilityService = new StudentAvailabilityService(new StudentAvailabilityDAO());
         initComponents();
+        refreshTable();
     }
 
     private void initComponents() {
