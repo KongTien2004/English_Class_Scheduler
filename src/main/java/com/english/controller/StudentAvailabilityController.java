@@ -64,4 +64,12 @@ public class StudentAvailabilityController {
     public List<StudentAvailability> getAvailabilityByStudentId(String studentId) {
         return studentAvailabilityService.getAvailabilityByStudentId(studentId);
     }
+
+    public List<StudentAvailability> getAllStudentAvailabilities() {
+        return studentAvailabilityService.getAllStudentAvailabilities();
+    }
+
+    public int totalStudentAvailabilities() {
+        return studentAvailabilityService.totalStudentAvailabilities();
+    }
 }

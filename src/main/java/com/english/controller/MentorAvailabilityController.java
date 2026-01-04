@@ -64,4 +64,12 @@ public class MentorAvailabilityController {
     public List<MentorAvailability> getAvailabilityByMentorId(String mentorId) {
         return mentorAvailabilityService.getAvailabilityByMentorId(mentorId);
     }
+
+    public List<MentorAvailability> getAllMentorAvailabilities() {
+        return mentorAvailabilityService.getAllMentorAvailabilities();
+    }
+
+    public int totalMentorAvailability() {
+        return mentorAvailabilityService.totalMentorAvailability();
+    }
 }

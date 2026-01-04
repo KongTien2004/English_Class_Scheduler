@@ -73,4 +73,8 @@ public class StudentPreferenceController {
     public List<StudentPreference> getPreferenceByStudent(String studentId) {
         return studentPreferenceService.getPreferenceByStudent(studentId);
     }
+
+    public int totalPreferences() {
+        return studentPreferenceService.totalPreferences();
+    }
 }
