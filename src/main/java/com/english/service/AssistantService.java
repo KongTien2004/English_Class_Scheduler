@@ -43,6 +43,10 @@ public class AssistantService {
         return assistantDAO.getAssistantsByAddress(assistantAddress);
     }
 
+    public int totalAssistants() {
+        return assistantDAO.getAllAssistants().size();
+    }
+
     private boolean validateAssistant(Assistant assistant) {
         if (assistant == null) return false;
         if (assistant.getAssistantId() == null || assistant.getAssistantId().trim().isEmpty()) return false;

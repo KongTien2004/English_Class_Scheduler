@@ -73,4 +73,8 @@ public class AssistantController {
     public List<Assistant> getAssistantsByAddress(String assistantAddress) {
         return assistantService.getAssistantsByAddress(assistantAddress);
     }
+
+    public int totalAssistants() {
+        return assistantService.totalAssistants();
+    }
 }
