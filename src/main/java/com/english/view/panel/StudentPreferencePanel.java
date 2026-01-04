@@ -1,14 +1,19 @@
 package com.english.view.panel;
 
+import com.english.model.StudentPreference;
+import com.english.service.StudentPreferenceService;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.List;
 
 public class StudentPreferencePanel extends JPanel {
     private JTable preferenceTable;
     private DefaultTableModel tableModel;
     private JTextField searchField;
     private JButton addButton, editButton, deleteButton, refreshButton;
+    private StudentPreferenceService studentPreferenceService;
 
     public StudentPreferencePanel() {
         setLayout(new BorderLayout());
@@ -226,7 +231,26 @@ public class StudentPreferencePanel extends JPanel {
     }
 
     private void refreshTable() {
-        // TODO: Load data from database
         tableModel.setRowCount(0);
+        try {
+            List<StudentPreference> preferences = studentPreferenceService.getAllPreferences();
+            for (StudentPreference preference : preferences) {
+                Object[] row = {
+                        preference.getPreferenceId(),
+                        preference.getStudentId(),
+                        preference.getPreferredCenter(),
+                        preference.getDayOfWeek().name(),
+                        preference.getPreferredStart() != null ? preference.getPreferredStart().toString() : "",
+                        preference.getPreferredEnd() != null ? preference.getPreferredEnd().toString() : ""
+                };
+                tableModel.addRow(row);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Error loading student's preference list: " + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
     }
 }

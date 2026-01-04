@@ -1,14 +1,19 @@
 package com.english.view.panel;
 
+import com.english.model.LearningSession;
+import com.english.service.LearningSessionService;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.List;
 
 public class LearningSessionPanel extends JPanel {
     private JTable sessionTable;
     private DefaultTableModel tableModel;
     private JTextField searchField;
     private JButton addButton, editButton, cancelButton, completeButton, refreshButton;
+    private LearningSessionService learningSessionService;
 
     public LearningSessionPanel() {
         setLayout(new BorderLayout());
@@ -240,7 +245,29 @@ public class LearningSessionPanel extends JPanel {
     }
 
     private void refreshTable() {
-        // TODO: Load data from database
         tableModel.setRowCount(0);
+        try {
+            List<LearningSession> sessions = learningSessionService.getAllLearningSessions();
+            for (LearningSession session : sessions) {
+                Object[] row = {
+                        session.getSessionId(),
+                        session.getPlanId(),
+                        session.getSessionNumber(),
+                        session.getSessionType().name(),
+                        session.getScheduledTime() != null ? session.getScheduledTime().toString() : "",
+                        session.getStartTime() != null ? session.getStartTime().toString() : "",
+                        session.getEndTime() != null ? session.getEndTime().toString() : "",
+                        session.getLocation(),
+                        session.getSessionStatus()
+                };
+                tableModel.addRow(row);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Error loading sessions: " + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
     }
 }

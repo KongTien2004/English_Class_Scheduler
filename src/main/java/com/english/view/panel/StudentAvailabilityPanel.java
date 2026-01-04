@@ -1,14 +1,19 @@
 package com.english.view.panel;
 
+import com.english.model.StudentAvailability;
+import com.english.service.StudentAvailabilityService;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.List;
 
 public class StudentAvailabilityPanel extends JPanel {
     private JTable availabilityTable;
     private DefaultTableModel tableModel;
     private JTextField searchField;
     private JButton addButton, editButton, deleteButton, refreshButton;
+    private StudentAvailabilityService studentAvailabilityService;
 
     public StudentAvailabilityPanel() {
         setLayout(new BorderLayout());
@@ -223,7 +228,25 @@ public class StudentAvailabilityPanel extends JPanel {
     }
 
     private void refreshTable() {
-        // TODO: Load data from database
         tableModel.setRowCount(0);
+        try {
+            List<StudentAvailability> studentAvailabilities = studentAvailabilityService.getAllStudentAvailabilities();
+            for (StudentAvailability studentAvailability : studentAvailabilities) {
+                Object[] row = {
+                    studentAvailability.getAvailabilityId(),
+                    studentAvailability.getStudentId(),
+                    studentAvailability.getDayOfWeek().name(),
+                    studentAvailability.getStartTime() != null ? studentAvailability.getStartTime().toString() : "",
+                    studentAvailability.getEndTime() != null ? studentAvailability.getEndTime().toString() : ""
+                };
+                tableModel.addRow(row);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Error loading student's availability list: " + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
     }
 }

@@ -1,14 +1,19 @@
 package com.english.view.panel;
 
+import com.english.model.MentorAvailability;
+import com.english.service.MentorAvailabilityService;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.List;
 
 public class MentorAvailabilityPanel extends JPanel {
     private JTable availabilityTable;
     private DefaultTableModel tableModel;
     private JTextField searchField;
     private JButton addButton, editButton, deleteButton, refreshButton;
+    private MentorAvailabilityService mentorAvailabilityService;
 
     public MentorAvailabilityPanel() {
         setLayout(new BorderLayout());
@@ -223,7 +228,25 @@ public class MentorAvailabilityPanel extends JPanel {
     }
 
     private void refreshTable() {
-        // TODO: Load data from database
         tableModel.setRowCount(0);
+        try {
+            List<MentorAvailability> mentorAvailabilities = mentorAvailabilityService.getAllMentorAvailabilities();
+            for (MentorAvailability mentorAvailability : mentorAvailabilities) {
+                Object[] row = {
+                    mentorAvailability.getAvailabilityId(),
+                    mentorAvailability.getMentorId(),
+                    mentorAvailability.getDayOfWeek().name(),
+                    mentorAvailability.getStartTime() != null ? mentorAvailability.getStartTime().toString() : "",
+                    mentorAvailability.getEndTime() != null ? mentorAvailability.getEndTime().toString() : ""
+                };
+                tableModel.addRow(row);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Error loading mentor's availability list: " + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
     }
 }
