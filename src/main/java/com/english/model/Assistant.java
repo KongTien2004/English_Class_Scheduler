@@ -6,7 +6,7 @@ public class Assistant implements Serializable {
     private String assistantId;
     private String assistantName;
     private String email;
-    private double certified_band;
+    private double certifiedBand;
     private boolean strongReading;
     private boolean strongListening;
     private boolean strongWriting;
@@ -19,13 +19,13 @@ public class Assistant implements Serializable {
     public Assistant() {
     }
 
-    public Assistant(String assistantId, String assistantName, String email, double certified_band,
+    public Assistant(String assistantId, String assistantName, String email, double certifiedBand,
                      boolean strongReading, boolean strongListening, boolean strongWriting, boolean strongSpeaking,
                      boolean canSupportGeneral, boolean canSupportAcademic, boolean isAvailable, String assistantAddress) {
         this.assistantId = assistantId;
         this.assistantName = assistantName;
         this.email = email;
-        this.certified_band = certified_band;
+        this.certifiedBand = certifiedBand;
         this.strongReading = strongReading;
         this.strongListening = strongListening;
         this.strongWriting = strongWriting;
@@ -49,8 +49,8 @@ public class Assistant implements Serializable {
         return email;
     }
 
-    public double getCertified_band() {
-        return certified_band;
+    public double getCertifiedBand() {
+        return certifiedBand;
     }
 
     public boolean isStrongReading() {
@@ -98,8 +98,8 @@ public class Assistant implements Serializable {
         this.email = email;
     }
 
-    public void setCertified_band(double certified_band) {
-        this.certified_band = certified_band;
+    public void setCertifiedBand(double certified_band) {
+        this.certifiedBand = certified_band;
     }
 
     public void setStrongReading(boolean strongReading) {

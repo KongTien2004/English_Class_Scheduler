@@ -18,7 +18,7 @@ public class AssistantDAO {
             statement.setString(1, assistant.getAssistantId());
             statement.setString(2, assistant.getAssistantName());
             statement.setString(3, assistant.getEmail());
-            statement.setDouble(4, assistant.getCertified_band());
+            statement.setDouble(4, assistant.getCertifiedBand());
             statement.setBoolean(5, assistant.isStrongListening());
             statement.setBoolean(6, assistant.isStrongReading());
             statement.setBoolean(7, assistant.isStrongWriting());
@@ -43,7 +43,7 @@ public class AssistantDAO {
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, assistant.getAssistantName());
             statement.setString(2, assistant.getEmail());
-            statement.setDouble(3, assistant.getCertified_band());
+            statement.setDouble(3, assistant.getCertifiedBand());
             statement.setBoolean(4, assistant.isStrongListening());
             statement.setBoolean(5, assistant.isStrongReading());
             statement.setBoolean(6, assistant.isStrongWriting());
