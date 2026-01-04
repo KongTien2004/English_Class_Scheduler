@@ -102,6 +102,7 @@ public class StudentDAO {
         student.setCurrentWritingBand(rs.getDouble("current_writing_band"));
         student.setCurrentSpeakingBand(rs.getDouble("current_speaking_band"));
         student.setPreferredCenterId(rs.getString("preferred_center_id"));
+        student.setStudentName(rs.getString("student_name"));
 
         return student;
     }

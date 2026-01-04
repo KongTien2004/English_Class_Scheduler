@@ -90,6 +90,7 @@ public class MentorDAO {
         mentor.setCanTeachGeneral(rs.getBoolean("can_teach_general"));
         mentor.setCanTeachAcademic(rs.getBoolean("can_teach_academic"));
         mentor.setAvailable(rs.getBoolean("is_available"));
+        mentor.setMentorAddress(rs.getString("mentor_address"));
 
         return mentor;
     }
