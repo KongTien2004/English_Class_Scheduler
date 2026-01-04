@@ -15,7 +15,7 @@ public class AssistantSearchStrategy implements SearchableEntity<Assistant> {
         // Score based on certified band
         if (criteria.containsKey("certified_band")) {
             double desiredBand = (double) criteria.get("certified_band");
-            if (assistant.getCertified_band() >= desiredBand) {
+            if (assistant.getCertifiedBand() >= desiredBand) {
                 score += 20;
             }
         }
@@ -62,7 +62,7 @@ public class AssistantSearchStrategy implements SearchableEntity<Assistant> {
                     if (criteria.containsKey("email") && !assistant.getEmail().toLowerCase().contains(((String) criteria.get("email")).toLowerCase())) {
                         return false;
                     }
-                    if (criteria.containsKey("certified_band") && assistant.getCertified_band() < (double) criteria.get("certified_band")) {
+                    if (criteria.containsKey("certified_band") && assistant.getCertifiedBand() < (double) criteria.get("certified_band")) {
                         return false;
                     }
                     if (criteria.containsKey("strongReading") && (boolean) criteria.get("strongReading") && !assistant.isStrongReading()) {
