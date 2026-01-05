@@ -87,6 +87,23 @@ public class LearningPlanDAO {
         return null;
     }
 
+    public LearningPlan getLearningPlanByStudentId(String studentId) {
+        String query = "SELECT * FROM learning_plan WHERE student_id = ?";
+
+        try (Connection connection = DBConnect.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, studentId);
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                return mapResultSetToLearningPlan(rs);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
     public List<LearningPlan> getAllLearningPlans() {
         List<LearningPlan> learningPlans = new ArrayList<>();
         String query = "SELECT * FROM learning_plan";

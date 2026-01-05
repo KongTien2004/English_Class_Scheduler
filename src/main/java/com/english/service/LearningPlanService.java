@@ -32,6 +32,11 @@ public class LearningPlanService {
         return learningPlanDAO.getLearningPLanById(planId);
     }
 
+    public LearningPlan getLearningPlanByStudentId(String studentId) {
+        if (studentId == null || studentId.trim().isEmpty()) return null;
+        return learningPlanDAO.getLearningPlanByStudentId(studentId);
+    }
+
     public List<LearningPlan> getAllLearningPlans() {
         return learningPlanDAO.getAllLearningPlans();
     }

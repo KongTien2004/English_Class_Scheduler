@@ -65,6 +65,10 @@ public class LearningPlanController {
         return learningPlanService.getLearningPlanById(planId);
     }
 
+    public LearningPlan getLearningPlanByStudentId(String studentId) {
+        return learningPlanService.getLearningPlanByStudentId(studentId);
+    }
+
     public List<LearningPlan> getAllLearningPlans() {
         return learningPlanService.getAllLearningPlans();
     }
