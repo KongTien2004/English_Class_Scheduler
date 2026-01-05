@@ -22,6 +22,7 @@ public class MainFrame extends JFrame {
     private MentorAvailabilityPanel mentorAvailabilityPanel;
     private StudentAvailabilityPanel studentAvailabilityPanel;
     private StudentPreferencePanel studentPreferencePanel;
+    private SchedulerPanel schedulerPanel;
 
     public MainFrame() {
         setTitle("IELTS Class Scheduler");
@@ -61,6 +62,7 @@ public class MainFrame extends JFrame {
         mentorAvailabilityPanel = new MentorAvailabilityPanel();
         studentAvailabilityPanel = new StudentAvailabilityPanel();
         studentPreferencePanel = new StudentPreferencePanel();
+        schedulerPanel = new SchedulerPanel();
 
         // Add panels to card layout
         contentPanel.add(dashboardPanel, "Dashboard");
@@ -75,6 +77,7 @@ public class MainFrame extends JFrame {
         contentPanel.add(mentorAvailabilityPanel, "Mentor Availabilities");
         contentPanel.add(studentAvailabilityPanel, "Student Availabilities");
         contentPanel.add(studentPreferencePanel, "Student Preferences");
+        contentPanel.add(schedulerPanel, "Scheduler");
 
         add(contentPanel, BorderLayout.CENTER);
 
@@ -114,7 +117,7 @@ public class MainFrame extends JFrame {
         managementMenu.setForeground(Color.BLACK);
 
         String[] menuItems = {"Students", "Mentors", "Assistants", "Rooms", "Centers", "Packages",
-                "Learning Plans", "Learning Sessions", "Mentor Availabilities", "Student Availabilities", "Student Preferences"};
+                "Learning Plans", "Learning Sessions", "Mentor Availabilities", "Student Availabilities", "Student Preferences", "Scheduler"};
         for (String item : menuItems) {
             JMenuItem menuItem = new JMenuItem(item);
             menuItem.addActionListener(e -> showPanel(item));
@@ -142,7 +145,7 @@ public class MainFrame extends JFrame {
         // Menu buttons
         String[] menuItems = {
                 "Dashboard", "Students", "Mentors", "Assistants", "Rooms", "Centers", "Packages",
-                "Learning Plans", "Learning Sessions", "Mentor Availabilities", "Student Availabilities", "Student Preferences"
+                "Learning Plans", "Learning Sessions", "Mentor Availabilities", "Student Availabilities", "Student Preferences", "Scheduler"
         };
 
         for (int i = 0; i < menuItems.length; i++) {
