@@ -314,7 +314,7 @@ public class SchedulerPanel extends JPanel {
         scheduleTable.setRowHeight(30);
         scheduleTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
         scheduleTable.getTableHeader().setBackground(new Color(142, 68, 173));
-        scheduleTable.getTableHeader().setForeground(Color.WHITE);
+        scheduleTable.getTableHeader().setForeground(Color.BLACK);
         scheduleTable.setFont(new Font("Arial", Font.PLAIN, 11));
         scheduleTable.setSelectionBackground(new Color(232, 218, 239));
 
