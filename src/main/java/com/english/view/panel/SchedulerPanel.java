@@ -568,13 +568,16 @@ public class SchedulerPanel extends JPanel {
 
         int sessionNumber = 1;
         for (Scheduler.ScheduleProposal proposal : proposals) {
-            // Get room info
-            Room room = roomService.getRoomById(extractRoomIdFromLocation(proposal.centerId));
+            // Get room info: use proposal.roomId (mới)
+            Room room = null;
+            if (proposal.roomId != null) {
+                room = roomService.getRoomById(proposal.roomId);
+            }
             String roomName = room != null ? room.getRoomName() : "TBD";
 
             // Get center info
             Center center = centerService.getCenterById(proposal.centerId);
-            String centerName = center != null ? center.getCenterName() : proposal.centerId;
+            String centerName = center != null ? center.getCenterName() : (proposal.centerId != null ? proposal.centerId : "TBD");
 
             // Format date and time
             String dateTime = proposal.scheduledTime.format(dateFormatter);

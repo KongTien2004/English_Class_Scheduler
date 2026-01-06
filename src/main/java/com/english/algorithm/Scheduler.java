@@ -454,7 +454,8 @@ public class Scheduler {
         session.setScheduledTime(proposal.scheduledTime);
         session.setStartTime(proposal.scheduledTime.toLocalTime());
         session.setEndTime(endTime.toLocalTime());
-        session.setLocation(proposal.centerId);
+        // Nếu proposal có roomId thì set location = roomId, nếu không có thì fallback về centerId
+        session.setLocation(proposal.roomId != null ? proposal.roomId : proposal.centerId);
         session.setSessionStatus(LearningSession.SessionStatus.scheduled);
 
         return session;
@@ -508,10 +509,20 @@ public class Scheduler {
         double currentScore = scoreTimeSlot(currentTime, student, mentor);
 
         String bestCenterId = findNearestCenterToStudent(student, preferredCenterId);
+        String chosenCenterId = bestCenterId != null ? bestCenterId : preferredCenterId;
+
+        // Tìm phòng tương ứng cho center + thời gian + plan
+        Room assignedRoom = null;
+        if (chosenCenterId != null) {
+            assignedRoom = findOptimalRoom(chosenCenterId, currentTime, LearningSession.SessionType.Offline, planId);
+        }
+        String assignedRoomId = assignedRoom != null ? assignedRoom.getRoomId() : null;
+
         ScheduleProposal currentProposal = new ScheduleProposal(
                 currentTime,
                 LearningSession.SessionType.Offline,
-                bestCenterId != null ? bestCenterId : preferredCenterId,
+                chosenCenterId,
+                assignedRoomId,
                 currentScore
         );
 
@@ -522,6 +533,7 @@ public class Scheduler {
 
             LocalDateTime bestTime = null;
             double bestScore = currentScore;
+            String bestRoomIdForBestTime = assignedRoomId;
 
             for (LocalDateTime neighborTime : neighbors) {
                 double score = scoreTimeSlot(neighborTime, student, mentor);
@@ -534,10 +546,18 @@ public class Scheduler {
             if (bestTime != null) {
                 currentTime = bestTime;
                 currentScore = bestScore;
+
+                // Khi chọn time mới, thử tìm lại room phù hợp cho cùng center
+                if (chosenCenterId != null) {
+                    Room roomForNewTime = findOptimalRoom(chosenCenterId, currentTime, LearningSession.SessionType.Offline, planId);
+                    bestRoomIdForBestTime = roomForNewTime != null ? roomForNewTime.getRoomId() : null;
+                }
+
                 currentProposal = new ScheduleProposal(
                         currentTime,
                         LearningSession.SessionType.Offline,
-                        bestCenterId != null ? bestCenterId : preferredCenterId,
+                        chosenCenterId,
+                        bestRoomIdForBestTime,
                         currentScore
                 );
                 noImprovementCount = 0;
@@ -866,20 +886,22 @@ public class Scheduler {
         public final LocalDateTime scheduledTime;
         public final LearningSession.SessionType sessionType;
         public final String centerId;
+        public final String roomId; // <-- mới: roomId (có thể null nếu không tìm được)
         public final double score;
 
         public ScheduleProposal(LocalDateTime scheduledTime, LearningSession.SessionType sessionType,
-                                String centerId, double score) {
+                                String centerId, String roomId, double score) {
             this.scheduledTime = scheduledTime;
             this.sessionType = sessionType;
             this.centerId = centerId;
+            this.roomId = roomId;
             this.score = score;
         }
 
         @Override
         public String toString() {
-            return String.format("Time: %s, Type: %s, Center: %s, Score: %.2f",
-                    scheduledTime, sessionType, centerId, score);
+            return String.format("Time: %s, Type: %s, Center: %s, Room: %s, Score: %.2f",
+                    scheduledTime, sessionType, centerId, roomId, score);
         }
     }
 }
