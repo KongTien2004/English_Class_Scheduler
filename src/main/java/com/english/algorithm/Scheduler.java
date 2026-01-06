@@ -15,6 +15,15 @@ import java.util.stream.Collectors;
  * OPTIMIZED Scheduler - Tối ưu hiệu năng với caching
  */
 public class Scheduler {
+    private Map<String, List<TimeWindow>> roomBookings;    // key = roomId -> list of bookings (sorted by start)
+    private Map<String, List<TimeWindow>> mentorBookings;  // key = mentorId -> list of bookings (sorted by start)
+
+    private static class TimeWindow {
+        public final LocalDateTime start;
+        public final LocalDateTime end;
+        public TimeWindow(LocalDateTime s, LocalDateTime e) { start = s; end = e; }
+    }
+
     private final StudentController studentController;
     private final MentorController mentorController;
     private final AssistantController assistantController;
@@ -133,6 +142,30 @@ public class Scheduler {
         // Cache assistants by address
         assistantCache = assistantController.getAllAssistants().stream()
                 .collect(Collectors.groupingBy(a -> a.getAssistantAddress() != null ? a.getAssistantAddress() : ""));
+
+        roomBookings = new HashMap<>();
+        mentorBookings = new HashMap<>();
+
+        for (LearningSession s : allSessionsCache) {
+            if (s.getSessionStatus() != LearningSession.SessionStatus.scheduled) continue;
+
+            LocalDateTime st = s.getScheduledTime();
+            LocalDateTime en = st.plusHours(SESSION_DURATION_HOURS);
+
+            // location có thể lưu roomId hoặc centerId theo thiết kế; mình assume session.location chứa roomId nếu đã có
+            String location = s.getLocation();
+            if (location != null && !location.isEmpty()) {
+                roomBookings.computeIfAbsent(location, k -> new ArrayList<>()).add(new TimeWindow(st, en));
+            }
+
+            LearningPlan plan = planCache.get(s.getPlanId());
+            if (plan != null && plan.getMentorId() != null) {
+                mentorBookings.computeIfAbsent(plan.getMentorId(), k -> new ArrayList<>()).add(new TimeWindow(st, en));
+            }
+        }
+
+        roomBookings.values().forEach(list -> list.sort(Comparator.comparing(w -> w.start)));
+        mentorBookings.values().forEach(list -> list.sort(Comparator.comparing(w -> w.start)));
 
         long endTime = System.currentTimeMillis();
         System.out.println("✅ Cache initialized in " + (endTime - startTime) + "ms");
@@ -397,33 +430,37 @@ public class Scheduler {
      * **OPTIMIZED: Check room availability - dùng cache**
      */
     private boolean isRoomAvailableAtTime(Room room, LocalDateTime time) {
+        if (room == null) return false;
+        List<TimeWindow> bookings = roomBookings.getOrDefault(room.getRoomId(), Collections.emptyList());
+        if (bookings.isEmpty()) return true;
+
         LocalDateTime endTime = time.plusHours(SESSION_DURATION_HOURS);
 
-        return allSessionsCache.stream()
-                .filter(s -> s.getLocation() != null && s.getLocation().contains(room.getRoomId()))
-                .filter(s -> s.getSessionStatus() == LearningSession.SessionStatus.scheduled)
-                .noneMatch(s -> {
-                    LocalDateTime sessionEnd = s.getScheduledTime().plusHours(SESSION_DURATION_HOURS);
-                    return time.isBefore(sessionEnd) && s.getScheduledTime().isBefore(endTime);
-                });
+        for (TimeWindow b : bookings) {
+            if (time.isBefore(b.end) && b.start.isBefore(endTime)) {
+                return false;
+            }
+            if (b.start.isAfter(endTime)) break;
+        }
+        return true;
     }
 
     /**
      * **OPTIMIZED: Check mentor conflict - dùng cache**
      */
     private boolean hasMentorConflict(LocalDateTime time, String mentorId) {
-        LocalDateTime endTime = time.plusHours(SESSION_DURATION_HOURS);
+        if (mentorId == null) return false;
+        List<TimeWindow> bookings = mentorBookings.getOrDefault(mentorId, Collections.emptyList());
+        if (bookings.isEmpty()) return false;
 
-        return allSessionsCache.stream()
-                .filter(s -> {
-                    LearningPlan plan = planCache.get(s.getPlanId());
-                    return plan != null && plan.getMentorId().equals(mentorId);
-                })
-                .filter(s -> s.getSessionStatus() == LearningSession.SessionStatus.scheduled)
-                .anyMatch(s -> {
-                    LocalDateTime sessionEnd = s.getScheduledTime().plusHours(SESSION_DURATION_HOURS);
-                    return time.isBefore(sessionEnd) && s.getScheduledTime().isBefore(endTime);
-                });
+        LocalDateTime endTime = time.plusHours(SESSION_DURATION_HOURS);
+        for (TimeWindow b : bookings) {
+            if (time.isBefore(b.end) && b.start.isBefore(endTime)) {
+                return true;
+            }
+            if (b.start.isAfter(endTime)) break;
+        }
+        return false;
     }
 
     /**
@@ -472,8 +509,8 @@ public class Scheduler {
         List<LocalDateTime> possibleTimes = generatePossibleTimeSlots(startDate);
         if (possibleTimes.isEmpty()) return null;
 
-        // Lấy preferences từ cache
-        List<StudentPreference> preferences = studentPreferenceCache.getOrDefault(student.getStudentId(), Collections.emptyList());
+        List<StudentPreference> preferences = studentPreferenceCache.getOrDefault(
+                student.getStudentId(), Collections.emptyList());
         String preferredCenterId = student.getPreferredCenterId();
 
         if (!preferences.isEmpty()) {
@@ -483,7 +520,6 @@ public class Scheduler {
             }
         }
 
-        // Validate center
         if (preferredCenterId != null && !centerCache.containsKey(preferredCenterId)) {
             List<Center> allCenters = new ArrayList<>(centerCache.values());
             if (!allCenters.isEmpty()) {
@@ -493,7 +529,6 @@ public class Scheduler {
             }
         }
 
-        // Lọc thời gian hợp lệ
         possibleTimes = possibleTimes.stream()
                 .filter(this::isWithinOperatingHours)
                 .filter(this::isValidSessionDuration)
@@ -504,17 +539,30 @@ public class Scheduler {
 
         if (possibleTimes.isEmpty()) return null;
 
-        // **Hill Climbing với iterations giảm**
-        LocalDateTime currentTime = possibleTimes.get(random.nextInt(possibleTimes.size()));
-        double currentScore = scoreTimeSlot(currentTime, student, mentor);
-
         String bestCenterId = findNearestCenterToStudent(student, preferredCenterId);
         String chosenCenterId = bestCenterId != null ? bestCenterId : preferredCenterId;
 
-        // Tìm phòng tương ứng cho center + thời gian + plan
-        Room assignedRoom = null;
+        List<Room> candidateRoomsForCenter = Collections.emptyList();
         if (chosenCenterId != null) {
-            assignedRoom = findOptimalRoom(chosenCenterId, currentTime, LearningSession.SessionType.Offline, planId);
+            candidateRoomsForCenter = roomCache.values().stream()
+                    .filter(r -> r.getCenterId().equals(chosenCenterId))
+                    .filter(Room::isAvailable)
+                    .collect(Collectors.toList());
+        }
+
+        // Chọn currentTime ban đầu
+        LocalDateTime currentTime = possibleTimes.get(random.nextInt(possibleTimes.size()));
+        double currentScore = scoreTimeSlot(currentTime, student, mentor);
+
+        // --- IMPORTANT: dùng bản sao final khi dùng trong lambda ---
+        Room assignedRoom = null;
+        if (!candidateRoomsForCenter.isEmpty()) {
+            final LocalDateTime timeForStream = currentTime; // <--- final copy
+            assignedRoom = candidateRoomsForCenter.stream()
+                    .filter(r -> isRoomAvailableAtTime(r, timeForStream))
+                    .filter(r -> hasEnoughCapacity(r, planId))
+                    .max(Comparator.comparing(r -> scoreRoom(r, timeForStream, planId)))
+                    .orElse(null);
         }
         String assignedRoomId = assignedRoom != null ? assignedRoom.getRoomId() : null;
 
@@ -527,16 +575,28 @@ public class Scheduler {
         );
 
         int noImprovementCount = 0;
-
         for (int i = 0; i < MAX_ITERATIONS && noImprovementCount < NO_IMPROVEMENT_THRESHOLD; i++) {
             List<LocalDateTime> neighbors = getRandomNeighbor(possibleTimes, currentTime, NEIGHBOR_SIZE);
 
             LocalDateTime bestTime = null;
             double bestScore = currentScore;
-            String bestRoomIdForBestTime = assignedRoomId;
 
             for (LocalDateTime neighborTime : neighbors) {
                 double score = scoreTimeSlot(neighborTime, student, mentor);
+
+                if (!candidateRoomsForCenter.isEmpty()) {
+                    final LocalDateTime neighborTimeForStream = neighborTime; // <-- final copy for lambda
+                    Room bestRoomForNeighbor = candidateRoomsForCenter.stream()
+                            .filter(r -> isRoomAvailableAtTime(r, neighborTimeForStream))
+                            .filter(r -> hasEnoughCapacity(r, planId))
+                            .max(Comparator.comparing(r -> scoreRoom(r, neighborTimeForStream, planId)))
+                            .orElse(null);
+                    if (bestRoomForNeighbor != null) {
+                        double roomBonus = 0.1 * scoreRoom(bestRoomForNeighbor, neighborTimeForStream, planId);
+                        score += roomBonus;
+                    }
+                }
+
                 if (score > bestScore) {
                     bestTime = neighborTime;
                     bestScore = score;
@@ -544,22 +604,31 @@ public class Scheduler {
             }
 
             if (bestTime != null) {
+                // chấp nhận bestTime -> cập nhật currentTime/currentScore
                 currentTime = bestTime;
                 currentScore = bestScore;
 
-                // Khi chọn time mới, thử tìm lại room phù hợp cho cùng center
-                if (chosenCenterId != null) {
-                    Room roomForNewTime = findOptimalRoom(chosenCenterId, currentTime, LearningSession.SessionType.Offline, planId);
-                    bestRoomIdForBestTime = roomForNewTime != null ? roomForNewTime.getRoomId() : null;
+                // khi dùng currentTime trong lambda, tạo bản sao final mới
+                if (!candidateRoomsForCenter.isEmpty()) {
+                    final LocalDateTime timeForStream2 = currentTime; // <-- new final copy
+                    Room bestRoomForCurrent = candidateRoomsForCenter.stream()
+                            .filter(r -> isRoomAvailableAtTime(r, timeForStream2))
+                            .filter(r -> hasEnoughCapacity(r, planId))
+                            .max(Comparator.comparing(r -> scoreRoom(r, timeForStream2, planId)))
+                            .orElse(null);
+                    assignedRoomId = bestRoomForCurrent != null ? bestRoomForCurrent.getRoomId() : null;
+                } else {
+                    assignedRoomId = null;
                 }
 
                 currentProposal = new ScheduleProposal(
                         currentTime,
                         LearningSession.SessionType.Offline,
                         chosenCenterId,
-                        bestRoomIdForBestTime,
+                        assignedRoomId,
                         currentScore
                 );
+
                 noImprovementCount = 0;
             } else {
                 noImprovementCount++;
@@ -750,14 +819,14 @@ public class Scheduler {
     }
 
     private int countMentorClassesOnDay(String mentorId, LocalDate date) {
-        return (int) allSessionsCache.stream()
-                .filter(s -> {
-                    LearningPlan plan = planCache.get(s.getPlanId());
-                    return plan != null && plan.getMentorId().equals(mentorId);
-                })
-                .filter(s -> s.getSessionStatus() == LearningSession.SessionStatus.scheduled)
-                .filter(s -> s.getScheduledTime().toLocalDate().equals(date))
-                .count();
+        List<TimeWindow> bookings = mentorBookings.getOrDefault(mentorId, Collections.emptyList());
+        if (bookings.isEmpty()) return 0;
+
+        int cnt = 0;
+        for (TimeWindow b : bookings) {
+            if (b.start.toLocalDate().equals(date)) cnt++;
+        }
+        return cnt;
     }
 
     private boolean matchesDayOfWeek(DayOfWeek javaDayOfWeek, StudentPreference.DayOfWeeks preferenceDay) {
